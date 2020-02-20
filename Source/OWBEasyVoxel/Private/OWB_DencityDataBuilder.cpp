@@ -1,59 +1,64 @@
+
 #include "OWB_DencityDataBuilder.h"
-#include "MarchingCubes.h"
-#include "MarchingCubesTables.h"
-#include "DensityDataBuilder.h"
-#include "EasyVoxelsMCLibrary.h"
-#include "HeightMapTerrain/HeightMapTerrain.h"
+//#include "MarchingCubes.h"
+//#include "MarchingCubesTables.h"
+//#include "DensityDataBuilder.h"
+//#include "EasyVoxelsMCLibrary.h"
 
-void UMyDensityDataBuilder::InitWithHeighMap(TArray<float>* AHeightMap, int AWidth, int AHeight, float ACellWidth)
-{
-	HeightMap = AHeightMap;
-	Width = AWidth;
-	Height = AHeight;
-	CellWidth = ACellWidth;
+void UOWBDensityDataBuilder::BindToOpenWOrldBakery(UOpenWorldBakery* OpenWorldBakery) {
+	OWB = OpenWorldBakery;
 }
-UMyDensityDataBuilder::UMyDensityDataBuilder() {
-
+void UOWBDensityDataBuilder::SetChunk(int ChunkX, int ChunkY) {
+	if (ensureMsgf(OWB != nullptr, TEXT("Open world bakery not set, unsafe chunks setup - can not check - can not check validity")))
+		if (ensureMsgf(OWB->ChunksSetup.XChunks > 0, TEXT("Open world bakery haven't executed CookChunks() yet, unsafe chunks setup - can not check validity")))
+			ensureMsgf(OWB->ChunksSetup.XChunks >= ChunkX && OWB->ChunksSetup.YChunks >= ChunkY, TEXT("You set wrong chunk %i:%i. Only %i:%i available"), ChunkX, ChunkY, OWB->ChunksSetup.XChunks, OWB->ChunksSetup.YChunks);
+	if (ensureMsgf(ChunkX >= 0 && ChunkY >= 0, TEXT("Invalid chunks adress"))) {
+		ChunkX_ = ChunkX;
+		ChunkY_ = ChunkY;
+	}
 }
+UOWBDensityDataBuilder::UOWBDensityDataBuilder() {}
 
-UMyDensityDataBuilder::~UMyDensityDataBuilder()
+UOWBDensityDataBuilder::~UOWBDensityDataBuilder() {}
+
+FDensityPoint UOWBDensityDataBuilder::BuildDensityPoint_Implementation(const FIntVector& VoxelCoordinates, const FIntVector& ChunkSlot, const FVoxelSettings& Settings)
 {
-	//delete[] HeightMap;
-}
+	FDensityPoint ThisPointData(0, FLinearColor(0, 0, 0, 0));
+	if (ensureMsgf( OWB != nullptr,TEXT("Open world bakery not set, call BindToOpenWOrldBakery first"))
+		ensureMsgf(OWB->MapWidth > 0, TEXT("Open world bakery has no world cooked (have you called CalcHillsLayaut() already?)"))) {
+		int Z = VoxelCoordinates.Z;
+		int X = VoxelCoordinates.X; // +ChunkSlot.X * Settings.ChunkRadius.X;
+		int Y = VoxelCoordinates.Y; // +ChunkSlot.Y * Settings.ChunkRadius.Y;
 
-FDensityPoint UMyDensityDataBuilder::BuildDensityPoint_Implementation(const FIntVector& VoxelCoordinates, const FIntVector& ChunkSlot, const FVoxelSettings& Settings)
-{
-	FDensityPoint ThisPointData(0, FLinearColor(0,0,0,0));
-	int Z = VoxelCoordinates.Z;
-	int X = VoxelCoordinates.X + ChunkSlot.X * Settings.ChunkRadius.X;
-	int Y = VoxelCoordinates.Y + ChunkSlot.Y * Settings.ChunkRadius.Y;
+		if (ChunkX_ >= 0) {
+			X + = ChunkX_ * OWB->ChunksSetup.ChunkWidth;
+			Y + = ChunkY_ * OWB->ChunksSetup.ChunkHeight;
+		}
 
-	//if (ChunkSlot.X == 0)
-	//	UE_LOG(LogTemp, Log, TEXT("GetCellIn %i:%i:%i from chunk %i:%i:%i. Final coords %i:%i:%i"),
-	//		VoxelCoordinates.X, VoxelCoordinates.Y, VoxelCoordinates.Z,
-	//		ChunkSlot.X, ChunkSlot.Y, ChunkSlot.Z,X,Y,Z);
+		//if (ChunkSlot.X == 0)
+		//	UE_LOG(LogTemp, Log, TEXT("GetCellIn %i:%i:%i from chunk %i:%i:%i. Final coords %i:%i:%i"),
+		//		VoxelCoordinates.X, VoxelCoordinates.Y, VoxelCoordinates.Z,
+		//		ChunkSlot.X, ChunkSlot.Y, ChunkSlot.Z,X,Y,Z);
 
-	if (Z <= 1 || X <= 1 || Y <= 1 || X >= Width-1 || Y >= Height-1) {
-		return ThisPointData;
+		if (Z <= 1 || X <= 1 || Y <= 1 || X >= OWB->MapWidth - 1 || Y >= OWB->MapHeight - 1) {
+			return ThisPointData;
+		}
+
+		Z -= 3;
+		X--;
+		Y--;
+
+		OpenWorldBakery::FSquareMeter& Ground = OWB->Ground(X, Y);
+
+		float ThisCellHeight = Ground * OWB->CellWidth;
+		if (isnan(ThisCellHeight)) {
+			ThisCellHeight = 200000;
+		}
+
+		float BtmLVL = Z * CellWidth;
+		ThisPointData.Value = ThisCellHeight - BtmLVL;
+
 	}
-
-	Z -= 3;
-	X--;
-	Y--;
-
-	int CellAddr = X + Y * Width;
-	if (CellAddr >= HeightMap->Num()) {
-		return ThisPointData;
-	}
-
-	float ThisCellHeight = (*HeightMap)[CellAddr] * CellWidth * Width;
-	if (isnan(ThisCellHeight)) {
-		ThisCellHeight = 200000;
-	}
-
-	float BtmLVL = Z * CellWidth;
-	ThisPointData.Value = ThisCellHeight - BtmLVL;
-
 	return ThisPointData;
 }
 

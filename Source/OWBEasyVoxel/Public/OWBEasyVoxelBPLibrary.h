@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include
+#include "OWB_DencityDataBuilder.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "OWBEasyVoxelBPLibrary.generated.h"
 

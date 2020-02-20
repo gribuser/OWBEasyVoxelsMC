@@ -38,7 +38,8 @@ public class OWBEasyVoxel : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
-				"EasyVoxelsMC"
+				"EasyVoxelsMC",
+				"OpenWorldBakery"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
