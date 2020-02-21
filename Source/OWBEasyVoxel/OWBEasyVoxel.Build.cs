@@ -26,6 +26,8 @@ public class OWBEasyVoxel : ModuleRules
 			new string[]
 			{
 				"Core",
+				"EasyVoxelsMC",
+				"OpenWorldBakery"
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -37,9 +39,7 @@ public class OWBEasyVoxel : ModuleRules
 				"CoreUObject",
 				"Engine",
 				"Slate",
-				"SlateCore",
-				"EasyVoxelsMC",
-				"OpenWorldBakery"
+				"SlateCore"
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

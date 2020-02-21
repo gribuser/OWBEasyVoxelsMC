@@ -25,14 +25,14 @@ FDensityPoint UOWBDensityDataBuilder::BuildDensityPoint_Implementation(const FIn
 {
 	FDensityPoint ThisPointData(0, FLinearColor(0, 0, 0, 0));
 	if (ensureMsgf( OWB != nullptr,TEXT("Open world bakery not set, call BindToOpenWOrldBakery first"))
-		ensureMsgf(OWB->MapWidth > 0, TEXT("Open world bakery has no world cooked (have you called CalcHillsLayaut() already?)"))) {
+		&& ensureMsgf(OWB->MapWidth > 0, TEXT("Open world bakery has no world cooked (have you called CalcHillsLayaut() already?)"))) {
 		int Z = VoxelCoordinates.Z;
 		int X = VoxelCoordinates.X; // +ChunkSlot.X * Settings.ChunkRadius.X;
 		int Y = VoxelCoordinates.Y; // +ChunkSlot.Y * Settings.ChunkRadius.Y;
 
 		if (ChunkX_ >= 0) {
-			X + = ChunkX_ * OWB->ChunksSetup.ChunkWidth;
-			Y + = ChunkY_ * OWB->ChunksSetup.ChunkHeight;
+			X += ChunkX_ * OWB->ChunksSetup.ChunkWidth;
+			Y += ChunkY_ * OWB->ChunksSetup.ChunkHeight;
 		}
 
 		//if (ChunkSlot.X == 0)
@@ -50,7 +50,7 @@ FDensityPoint UOWBDensityDataBuilder::BuildDensityPoint_Implementation(const FIn
 
 		OpenWorldBakery::FSquareMeter& Ground = OWB->Ground(X, Y);
 
-		float ThisCellHeight = Ground * OWB->CellWidth;
+		float ThisCellHeight = Ground.GroundElevation * OWB->CellWidth;
 		if (isnan(ThisCellHeight)) {
 			ThisCellHeight = 200000;
 		}

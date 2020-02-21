@@ -4,7 +4,7 @@
 	"VersionName": "1.0",
 	"FriendlyName": "OWBEasyVoxel",
 	"Description": "",
-	"Category": "Other",
+	"Category": "Terrain",
 	"CreatedBy": "Dmitry Gribov",
 	"CreatedByURL": "primitive.game",
 	"DocsURL": "",
@@ -13,7 +13,7 @@
 	"CanContainContent": true,
 	"IsBetaVersion": true,
 	"IsExperimentalVersion": false,
-	"Installed": false,
+	"Installed": true,
 	"Modules": [
 		{
 			"Name": "OWBEasyVoxel",
