@@ -4,18 +4,19 @@
 #include "OWB_DencityDataBuilder.h"
 #include "OpenWorldBakery.h"
 #include "utility/OpenWorldBakeryHeightmapDebugMapping.h"
+#include "Components/SceneComponent.h"
 #include "OWB_EV_WorldVisualizer.generated.h"
 
 
-UCLASS()
-class OWBEASYVOXEL_API AWorldVisializer : public AActor
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
+class OWBEASYVOXEL_API UOWB_EV_WorldVisializer : public USceneComponent
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this actor's properties
-	AWorldVisializer();
-	//~AWorldVisializer();
+	UOWB_EV_WorldVisializer();
+	//~UOWB_EV_WorldVisializer();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration", meta = (ClampMin = "16"))
 	int MapResolution = 128;
@@ -58,6 +59,13 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, Category = "LandscapeGeneration")
 	FDebugTextureParams DebugTextureParams;
+	
+	UFUNCTION(BlueprintCallable, Category = "LandscapeGeneration")
+	void RemoveVisualization();
+
+	UFUNCTION(BlueprintCallable, Category = "LandscapeGeneration")
+	void CreateVisualization();
+
 private:
 //	FVoxelSettings Voxel;
 	UPROPERTY()
