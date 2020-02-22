@@ -1,7 +1,7 @@
 #include "OWB_EV_WorldVisualizer.h"
 
 AWorldVisializer::AWorldVisializer() {
-
+	Bakery = NewObject<UOpenWorldBakery>();
 }
 
 void AWorldVisializer::BeginPlay()

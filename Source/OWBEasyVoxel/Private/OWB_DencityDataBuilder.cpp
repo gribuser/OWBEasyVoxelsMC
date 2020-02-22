@@ -9,13 +9,17 @@ void UOWBDensityDataBuilder::BindToOpenWOrldBakery(UOpenWorldBakery* OpenWorldBa
 }
 void UOWBDensityDataBuilder::SetChunk(int ChunkX, int ChunkY) {
 	if (ensureMsgf(OWB != nullptr, TEXT("Open world bakery not set, unsafe chunks setup - can not check - can not check validity")))
-		if (ensureMsgf(OWB->ChunksSetup.XChunks > 0, TEXT("Open world bakery haven't executed CookChunks() yet, unsafe chunks setup - can not check validity")))
-			ensureMsgf(OWB->ChunksSetup.XChunks >= ChunkX && OWB->ChunksSetup.YChunks >= ChunkY, TEXT("You set wrong chunk %i:%i. Only %i:%i available"), ChunkX, ChunkY, OWB->ChunksSetup.XChunks, OWB->ChunksSetup.YChunks);
+		if (ensureMsgf(OWB->ChunksLayaut.XChunks > 0, TEXT("Open world bakery haven't executed CookChunks() yet, unsafe chunks setup - can not check validity")))
+			ensureMsgf(OWB->ChunksLayaut.XChunks >= ChunkX && OWB->ChunksLayaut.YChunks >= ChunkY, TEXT("You set wrong chunk %i:%i. Only %i:%i available"), ChunkX, ChunkY, OWB->ChunksLayaut.XChunks, OWB->ChunksLayaut.YChunks);
 	if (ensureMsgf(ChunkX >= 0 && ChunkY >= 0, TEXT("Invalid chunks adress"))) {
 		ChunkX_ = ChunkX;
 		ChunkY_ = ChunkY;
 	}
 }
+void UOWBDensityDataBuilder::SetLayer(EOWBMeshBlockTypes MapLayer) {
+	Layer = MapLayer;
+}
+
 UOWBDensityDataBuilder::UOWBDensityDataBuilder() {}
 
 UOWBDensityDataBuilder::~UOWBDensityDataBuilder() {}
@@ -30,8 +34,13 @@ FDensityPoint UOWBDensityDataBuilder::BuildDensityPoint_Implementation(const FIn
 		int Y = VoxelCoordinates.Y; // +ChunkSlot.Y * Settings.ChunkRadius.Y;
 
 		if (ChunkX_ >= 0) {
-			X += ChunkX_ * OWB->ChunksSetup.ChunkWidth;
-			Y += ChunkY_ * OWB->ChunksSetup.ChunkHeight;
+			FOWBMeshBlocks_set& ChunkDescrs = OWB->Chunks[ChunkX_ + ChunkY_ * OWB->ChunksLayaut.XChunks];
+			if (ChunkDescrs.Blocks.Contains(Layer)) {
+				X += ChunkDescrs.Blocks[Layer].MinPoint.X;
+				Y += ChunkDescrs.Blocks[Layer].MinPoint.Y;
+			} else {
+				return ThisPointData;
+			}
 		}
 
 		//if (ChunkSlot.X == 0)

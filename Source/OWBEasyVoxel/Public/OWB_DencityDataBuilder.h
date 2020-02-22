@@ -16,6 +16,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "OpenWorldBakery")
 	void SetChunk(int ChunkX, int ChunkY);
 
+	UFUNCTION(BlueprintCallable, Category = "OpenWorldBakery")
+	void SetLayer(EOWBMeshBlockTypes MapLayer);
+
 	UOWBDensityDataBuilder();
 	~UOWBDensityDataBuilder();
 
@@ -26,4 +29,5 @@ private:
 	UOpenWorldBakery* OWB = nullptr;
 	int ChunkX_ = -1;
 	int ChunkY_ = -1;
+	EOWBMeshBlockTypes Layer = EOWBMeshBlockTypes::Ground;
 };

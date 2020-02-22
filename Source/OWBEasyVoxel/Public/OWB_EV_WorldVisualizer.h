@@ -38,14 +38,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
 	int TerrainSeed = 2;
 
+	UPROPERTY(BlueprintReadOnly, Category = "LandscapeGeneration")
+	UOpenWorldBakery* Bakery;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	FCriticalSection MeshGenLock;
-	
-	UPROPERTY()
-	UOpenWorldBakery* OWB = nullptr;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
 	float ChunkSize = 5;
