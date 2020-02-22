@@ -1,4 +1,3 @@
-
 #include "OWB_DencityDataBuilder.h"
 //#include "MarchingCubes.h"
 //#include "MarchingCubesTables.h"
@@ -61,16 +60,3 @@ FDensityPoint UOWBDensityDataBuilder::BuildDensityPoint_Implementation(const FIn
 	}
 	return ThisPointData;
 }
-
-//FMyMarchingCubes::FMyMarchingCubes(const TMap<FIntVector, FDensityPoint>& InDensityData, UObject* InDensityInterfaceObject, const FVoxelSettings& InSettings, const FIntVector& InChunkSlot)
-//	: ModifiedDensityData(InDensityData)
-//	, ChunkSlot(InChunkSlot)
-//	, Settings(InSettings)
-//	, DensityInterfaceObject(InDensityInterfaceObject)
-//{
-//	super::
-//	ensureMsgf((Settings.Units.X >= 2), TEXT("X Unit Size must be higher or equal with two and a power of two."));
-//	ensureMsgf((Settings.Units.Y >= 2), TEXT("Y Unit Size must be higher or equal with two and a power of two."));
-//	ensureMsgf((Settings.Units.Z >= 2), TEXT("Z Unit Size must be higher or equal with two and a power of two."));
-//	ensureMsgf(Settings.Resolution > 0.f, TEXT("Voxel Resolution must be higher than 0."));
-//}

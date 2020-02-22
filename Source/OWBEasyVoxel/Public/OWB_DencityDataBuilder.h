@@ -5,16 +5,20 @@
 #include "OpenWorldBakery.h"
 #include "OWB_DencityDataBuilder.generated.h"
 
-UCLASS()
+UCLASS(BlueprintType)
 class OWBEASYVOXEL_API UOWBDensityDataBuilder : public UObject, public IDensityDataBuilder
 {
 	GENERATED_BODY()
 public:
+	UFUNCTION(BlueprintCallable, Category = "OpenWorldBakery")
 	void BindToOpenWOrldBakery(UOpenWorldBakery* OpenWorldBakery);
+
+	UFUNCTION(BlueprintCallable, Category = "OpenWorldBakery")
 	void SetChunk(int ChunkX, int ChunkY);
+
 	UOWBDensityDataBuilder();
 	~UOWBDensityDataBuilder();
-//	FDensityPoint BuildDensityPoint(const FIntVector& VoxelCoordinates, const FIntVector& ChunkSlot, const FVoxelSettings& Settings);
+
 	virtual FDensityPoint BuildDensityPoint_Implementation(const FIntVector& VoxelCoordinates, const FIntVector& ChunkSlot, const FVoxelSettings& Settings) override;
 private:
 	float CellWidth = 0;
