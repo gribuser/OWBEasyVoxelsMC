@@ -39,8 +39,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
 	int TerrainSeed = 2;
 
-	UPROPERTY(BlueprintReadOnly, Category = "LandscapeGeneration")
-	UOpenWorldBakery* Bakery;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
+	UOpenWorldBakery* OpenWorldBakery;
 
 protected:
 	// Called when the game starts or when spawned
