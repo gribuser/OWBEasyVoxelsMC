@@ -29,6 +29,10 @@
 		{
 			"Name": "EasyVoxelsMC",
 			"Enabled": true
+		},
+		{
+			"Name": "ProceduralMeshComponent",
+			"Enabled": true
 		}
 	]
 }

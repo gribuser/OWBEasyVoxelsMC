@@ -13,10 +13,10 @@ void UOWB_EV_WorldVisializer::BeginPlay()
 
 }
 
-void UOWB_EV_WorldVisializer::RemoveVisualization()
+void UOWB_EV_WorldVisializer::CreateVisualization()
 {
 }
 
-void UOWB_EV_WorldVisializer::CreateVisualization()
+void UOWB_EV_WorldVisializer::RemoveVisualization()
 {
 }
