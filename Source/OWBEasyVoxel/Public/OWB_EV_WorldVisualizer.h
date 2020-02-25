@@ -81,5 +81,7 @@ private:
 	TArray<AOWB_EV_Chunk*> ChunksVisualizers;
 	TArray<EOWBMeshBlockTypes> LayersToDraw;
 
+	void PlaceOcean(int X, int Y);
+
 };
 

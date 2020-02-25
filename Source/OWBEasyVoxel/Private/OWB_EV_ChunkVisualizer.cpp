@@ -15,25 +15,10 @@ AOWB_EV_Chunk::AOWB_EV_Chunk()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	//	SetMobility(EComponentMobility::Movable);
-	USceneComponent* EmptyRoot = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Empty root"));
-	SetRootComponent(EmptyRoot);
-	bool HasRoot = false;
-	for (EOWBMeshBlockTypes& Layer : LayersToDraw) {
-		UProceduralMeshComponent* AProceduralMesh;
-		//if (!HasRoot)
-		//	AProceduralMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Procedural mesh"));
-		//else
-			AProceduralMesh = NewObject<UProceduralMeshComponent>();
-		AProceduralMesh->bUseAsyncCooking = false;
-		AProceduralMesh->bUseComplexAsSimpleCollision = true;
-		AProceduralMesh->RegisterComponent();
-//		AProceduralMesh->SetupAttachment(GetRootComponent());
-		//if (!HasRoot) {
-		//	SetRootComponent(AProceduralMesh);
-		//	HasRoot = true;
-		//}
-		ProceduralMesh.Add(Layer, AProceduralMesh);
-	}
+	ProceduralMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Empty root"));
+	SetRootComponent(ProceduralMesh);
+	ProceduralMesh->bUseAsyncCooking = false;
+	ProceduralMesh->bUseComplexAsSimpleCollision = true;
 
 	DensityBuilder = NewObject<UOWBDensityDataBuilder>();
 
@@ -72,33 +57,7 @@ void AOWB_EV_Chunk::InitTerrainBuild()
 		return;
 	}
 	State = EOWBEVChunkStates::OWBEV_Working;
-	if (MyChunkDescr->Blocks.Num() > 0) {
-		PlaceOcean();
-		CurLayer = 0;
-		DoBuildTerrainLayer();
-	}
-}
-const float SeaPlaneSize = 100;
-void AOWB_EV_Chunk::PlaceOcean() {
-	if (!MyChunkDescr->Blocks.Contains(Ocean))
-		return;
-	FOWBMeshChunk& OceanChunk = MyChunkDescr->Blocks[Ocean];
-	float Scale = OWB->ChunksLayaut.ChunkWidth * WorldVisualizer->VoxelSize / SeaPlaneSize;
-	FActorSpawnParameters SpamParams;
-	SpamParams.Name = FName(*FString::Printf(TEXT("OceanChunk %i:%i"), ChunkX_, ChunkY_));
-	SpamParams.bNoFail = true;
-
-	FTransform MyTransform;
-	MyTransform.SetScale3D({ Scale,Scale,10.0 });
-	if (ensureMsgf(WorldVisualizer->OceanPlaneBP != nullptr, TEXT("Ocean plane template not defined, see world generator props"))) {
-		AActor* APlaneActor = GetWorld()->SpawnActor<AActor>(WorldVisualizer->OceanPlaneBP, MyTransform, SpamParams);
-		APlaneActor->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
-		APlaneActor->SetActorRelativeLocation({ SeaPlaneSize /2 * Scale, SeaPlaneSize /2 * Scale, 0});
-	}
-}
-
-void AOWB_EV_Chunk::DrawFInished() {
-	State = EOWBEVChunkStates::OWBEV_Idle;
+	DoBuildTerrainLayer();
 }
 
 void AOWB_EV_Chunk::DoBuildTerrainLayer(){
@@ -123,14 +82,6 @@ void AOWB_EV_Chunk::DoBuildTerrainLayer(){
 			LayerChunk.MaxPoint.Y - LayerChunk.MinPoint.Y + 3,
 			(LayerChunk.MaxHeight - LayerChunk.MinHeight) / OWB->CellWidth + 3.5001
 		);
-
-		FVector MeshLocation = { WorldVisualizer->VoxelSize, WorldVisualizer->VoxelSize ,WorldVisualizer->VoxelSize };
-		MeshLocation.X *= LayerChunk.MinPoint.X - ChunkX_ * OWB->ChunksLayaut.ChunkWidth - 1;
-		MeshLocation.Y *= LayerChunk.MinPoint.Y - ChunkY_ * OWB->ChunksLayaut.ChunkHeight - 1;
-
-		MeshLocation.Z *= LayerChunk.MinHeight / OWB->CellWidth;
-
-		ProceduralMesh[LayerToDraw]->SetRelativeLocation(MeshLocation);
 
 		WorkerCubes = MakeShareable(new FMarchingCubes({}, DensityBuilder, MCSettings, { 0,0,0 }));
 
@@ -176,20 +127,15 @@ void AOWB_EV_Chunk::DoBuildTerrainLayer(){
 
 		WorkerCubes->StartWork(BodyFunction, OnCompleteFunction, nullptr);
 	}
-	DrawFInished();
 }
 
 
 void AOWB_EV_Chunk::EndTerrainBuild(const FMeshData& AMeshData){
 	WorldVisualizer->MeshGeneratorLock.Lock();
-	ProceduralMesh[LayerToDraw]->CreateMeshSection_LinearColor(0, AMeshData.Vertices, AMeshData.Triangles, AMeshData.Normals, AMeshData.UV0, AMeshData.Colors, AMeshData.Tangents, true);
+	ProceduralMesh->CreateMeshSection_LinearColor(0, AMeshData.Vertices, AMeshData.Triangles, AMeshData.Normals, AMeshData.UV0, AMeshData.Colors, AMeshData.Tangents, true);
 	WorldVisualizer->MeshGeneratorLock.Unlock();
 
-	if (CurLayer < LayersToDraw.Num()) {
-		DoBuildTerrainLayer();
-	} else {
-		State = EOWBEVChunkStates::OWBEV_Idle;
-	}
+	State = EOWBEVChunkStates::OWBEV_Idle;
 }
 
 void AOWB_EV_Chunk::Tick(float DeltaTime) {

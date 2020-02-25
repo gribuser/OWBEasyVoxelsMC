@@ -35,7 +35,7 @@ public:
 	AOWB_EV_Chunk();
 	virtual void BeginPlay() override;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
-	TMap<TEnumAsByte<EOWBMeshBlockTypes>,UProceduralMeshComponent*> ProceduralMesh;
+	UProceduralMeshComponent* ProceduralMesh;
 
 	UFUNCTION(BlueprintCallable, Category = "OpenWorldBakery")
 	void BindToOpenWOrldBakery(UOpenWorldBakery* OpenWorldBakery, int ChunkX, int ChunkY);
@@ -50,6 +50,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	UOWB_EV_WorldVisializer* WorldVisualizer;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
+	EOWBMeshBlockTypes LayerToDraw;
+
+//	FOWBMeshBlocks_set* MyChunkDescr;
+
 private:
 	UPROPERTY()
 	UOWBDensityDataBuilder* DensityBuilder = nullptr;
@@ -59,7 +64,6 @@ private:
 
 	int ChunkX_ = -1;
 	int ChunkY_ = -1;
-	EOWBMeshBlockTypes LayerToDraw;
 
 	void EndTerrainBuild(const FMeshData& AMeshData);
 
@@ -67,11 +71,8 @@ private:
 	TSharedPtr<FMarchingCubes, ESPMode::ThreadSafe> WorkerCubes = nullptr;
 
 	FVoxelSettings MCSettings;
-	TArray<EOWBMeshBlockTypes> LayersToDraw;
 	int CurLayer = 0;
 	
-	FOWBMeshBlocks_set* MyChunkDescr;
-
 	void DoBuildTerrainLayer();
 	void PlaceOcean();
 	void DrawFInished();

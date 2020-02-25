@@ -52,17 +52,29 @@ void UOWB_EV_WorldVisializer::CreateVisualization() {
 //		FVector MyLocation = GetComponentLocation();
 		for (int x = 0; x < OpenWorldBakery->ChunksLayaut.XChunks; x++) {
 			for (int y = 0; y < OpenWorldBakery->ChunksLayaut.YChunks; y++) {
-				AOWB_EV_Chunk* NewChunk = GetWorld()->SpawnActor<AOWB_EV_Chunk>();
-				NewChunk->WorldVisualizer = this;
-				NewChunk->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
-				FVector NewLocation = FVector::ZeroVector;
-				NewLocation.X += ChunkSize * x * OpenWorldBakery->ChunksLayaut.ChunkWidth;
-				NewLocation.Y += ChunkSize * y * OpenWorldBakery->ChunksLayaut.ChunkHeight;
-				NewChunk->SetActorRelativeLocation(NewLocation, false, nullptr, {});
+				FOWBMeshBlocks_set& CurChunksDescr = OpenWorldBakery->Chunks[y * OpenWorldBakery->ChunksLayaut.XChunks + y];
+				for (EOWBMeshBlockTypes& Layer : LayersToDraw) {
+					if (CurChunksDescr.Blocks.Contains(Layer)) {
+						FOWBMeshChunk& LayerChunk = CurChunksDescr.Blocks[Layer];
+						AOWB_EV_Chunk* NewChunk = GetWorld()->SpawnActor<AOWB_EV_Chunk>();
+						NewChunk->WorldVisualizer = this;
+						NewChunk->LayerToDraw = Layer;
+						NewChunk->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
 
-				NewChunk->BindToOpenWOrldBakery(OpenWorldBakery, x, y);
-				NewChunk->State = EOWBEVChunkStates::OWBEV_Pending;
-				ChunksVisualizers.Add(NewChunk);
+						FVector MeshLocation = { VoxelSize, VoxelSize, VoxelSize };
+						MeshLocation.X *= LayerChunk.MinPoint.X - x * OpenWorldBakery->ChunksLayaut.ChunkWidth - 1;
+						MeshLocation.Y *= LayerChunk.MinPoint.Y - y * OpenWorldBakery->ChunksLayaut.ChunkHeight - 1;
+						MeshLocation.Z *= LayerChunk.MinHeight / OpenWorldBakery->CellWidth;
+
+						NewChunk->SetActorRelativeLocation(MeshLocation, false, nullptr, {});
+						NewChunk->BindToOpenWOrldBakery(OpenWorldBakery, x, y);
+						NewChunk->State = EOWBEVChunkStates::OWBEV_Pending;
+						ChunksVisualizers.Add(NewChunk);
+					}
+				}
+				if (CurChunksDescr.Blocks.Contains(EOWBMeshBlockTypes::Ocean)) {
+					PlaceOcean(x, y);
+				}
 			}
 		}
 //		PrimaryComponentTick.bCanEverTick = true;
@@ -77,3 +89,16 @@ void UOWB_EV_WorldVisializer::RemoveVisualization() {
 	ChunksVisualizers.Empty();
 }
 
+const float SeaPlaneSize = 100;
+void UOWB_EV_WorldVisializer::PlaceOcean(int X, int Y) {
+	float Scale = OpenWorldBakery->ChunksLayaut.ChunkWidth * VoxelSize / SeaPlaneSize;
+	FActorSpawnParameters SpamParams;
+
+	FTransform MyTransform;
+	MyTransform.SetScale3D({ Scale,Scale,10.0 });
+	if (ensureMsgf(OceanPlaneBP != nullptr, TEXT("Ocean plane template not defined, see world generator props"))) {
+		AActor* APlaneActor = GetWorld()->SpawnActor<AActor>(OceanPlaneBP, MyTransform);
+		APlaneActor->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
+		APlaneActor->SetActorRelativeLocation({ SeaPlaneSize / 2 * Scale, SeaPlaneSize / 2 * Scale, 0 });
+	}
+}
