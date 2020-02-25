@@ -19,9 +19,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "OpenWorldBakery")
 	void SetLayer(EOWBMeshBlockTypes MapLayer);
 
-	UOWBDensityDataBuilder();
-	~UOWBDensityDataBuilder();
-
 	virtual FDensityPoint BuildDensityPoint_Implementation(const FIntVector& VoxelCoordinates, const FIntVector& ChunkSlot, const FVoxelSettings& Settings) override;
 private:
 	float CellWidth = 0;

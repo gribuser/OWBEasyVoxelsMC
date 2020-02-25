@@ -20,10 +20,6 @@ void UOWBDensityDataBuilder::SetLayer(EOWBMeshBlockTypes MapLayer) {
 	Layer = MapLayer;
 }
 
-UOWBDensityDataBuilder::UOWBDensityDataBuilder() {}
-
-UOWBDensityDataBuilder::~UOWBDensityDataBuilder() {}
-
 FDensityPoint UOWBDensityDataBuilder::BuildDensityPoint_Implementation(const FIntVector& VoxelCoordinates, const FIntVector& ChunkSlot, const FVoxelSettings& Settings)
 {
 	FDensityPoint ThisPointData(0, FLinearColor(0, 0, 0, 0));

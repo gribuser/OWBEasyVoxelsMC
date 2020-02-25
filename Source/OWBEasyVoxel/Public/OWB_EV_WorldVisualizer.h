@@ -79,5 +79,7 @@ private:
 //	FVoxelSettings Voxel;
 	UPROPERTY()
 	TArray<AOWB_EV_Chunk*> ChunksVisualizers;
+	TArray<EOWBMeshBlockTypes> LayersToDraw;
+
 };
 

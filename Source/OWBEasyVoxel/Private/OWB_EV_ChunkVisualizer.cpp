@@ -14,22 +14,24 @@
 AOWB_EV_Chunk::AOWB_EV_Chunk()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	LayersToDraw.Add(Ground);
-	LayersToDraw.Add(Lake);
 	//	SetMobility(EComponentMobility::Movable);
+	USceneComponent* EmptyRoot = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Empty root"));
+	SetRootComponent(EmptyRoot);
 	bool HasRoot = false;
 	for (EOWBMeshBlockTypes& Layer : LayersToDraw) {
 		UProceduralMeshComponent* AProceduralMesh;
-		if (!HasRoot)
-			AProceduralMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Procedural mesh"));
-		else
+		//if (!HasRoot)
+		//	AProceduralMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Procedural mesh"));
+		//else
 			AProceduralMesh = NewObject<UProceduralMeshComponent>();
 		AProceduralMesh->bUseAsyncCooking = false;
 		AProceduralMesh->bUseComplexAsSimpleCollision = true;
-		if (!HasRoot) {
-			SetRootComponent(AProceduralMesh);
-			HasRoot = true;
-		}
+		AProceduralMesh->RegisterComponent();
+//		AProceduralMesh->SetupAttachment(GetRootComponent());
+		//if (!HasRoot) {
+		//	SetRootComponent(AProceduralMesh);
+		//	HasRoot = true;
+		//}
 		ProceduralMesh.Add(Layer, AProceduralMesh);
 	}
 
@@ -73,7 +75,7 @@ void AOWB_EV_Chunk::InitTerrainBuild()
 	if (MyChunkDescr->Blocks.Num() > 0) {
 		PlaceOcean();
 		CurLayer = 0;
-//		DoBuildTerrainLayer();
+		DoBuildTerrainLayer();
 	}
 }
 const float SeaPlaneSize = 100;
@@ -117,9 +119,9 @@ void AOWB_EV_Chunk::DoBuildTerrainLayer(){
 		FOWBMeshChunk& LayerChunk = MyChunkDescr->Blocks[LayerToDraw];
 
 		MCSettings.Units = FIntVector(
-			LayerChunk.MaxPoint.X - LayerChunk.MinPoint.X + 2,
-			LayerChunk.MaxPoint.Y - LayerChunk.MinPoint.Y + 2,
-			(LayerChunk.MaxHeight - LayerChunk.MinHeight) / OWB->CellWidth + 2.5001
+			LayerChunk.MaxPoint.X - LayerChunk.MinPoint.X + 3,
+			LayerChunk.MaxPoint.Y - LayerChunk.MinPoint.Y + 3,
+			(LayerChunk.MaxHeight - LayerChunk.MinHeight) / OWB->CellWidth + 3.5001
 		);
 
 		FVector MeshLocation = { WorldVisualizer->VoxelSize, WorldVisualizer->VoxelSize ,WorldVisualizer->VoxelSize };
