@@ -3,6 +3,7 @@
 
 
 #include "OWB_EV_ChunkVisualizer.h"
+#include "OWB_EV_WorldVisualizer.h"
 //#include "Components/StaticMeshComponent.h"
 //#include "VoxelLib/VoxelDataConverter.h"
 //#include "RuntimeMeshActor.h"
@@ -13,11 +14,31 @@
 AOWB_EV_Chunk::AOWB_EV_Chunk()
 {
 	PrimaryActorTick.bCanEverTick = true;
-//	SetMobility(EComponentMobility::Movable);
-	NewPMC = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("GeneratedMesh"));
-	NewPMC->bUseAsyncCooking = false;
-	NewPMC->bUseComplexAsSimpleCollision = true;
-	SetRootComponent(NewPMC);
+	LayersDoDraw.Add(Ground);
+	LayersDoDraw.Add(Lake);
+	//	SetMobility(EComponentMobility::Movable);
+	bool HasRoot = false;
+	for (EOWBMeshBlockTypes& Layer : LayersDoDraw) {
+		UProceduralMeshComponent* AProceduralMesh;
+		if (!HasRoot)
+			AProceduralMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Procedural mesh"));
+		else
+			AProceduralMesh = NewObject<UProceduralMeshComponent>();
+		AProceduralMesh->bUseAsyncCooking = false;
+		AProceduralMesh->bUseComplexAsSimpleCollision = true;
+		if (!HasRoot) {
+			SetRootComponent(AProceduralMesh);
+			HasRoot = true;
+		}
+		ProceduralMesh.Add(Layer, AProceduralMesh);
+	}
+
+	DensityBuilder = NewObject<UOWBDensityDataBuilder>();
+
+	MCSettings.ISOLevel = 0.0000001;
+	MCSettings.bInverted = false;
+	MCSettings.bUseSharedPoints = true;
+	MCSettings.bForceManifold = false;
 }
 
 
@@ -26,12 +47,154 @@ void AOWB_EV_Chunk::BeginPlay()
 	Super::BeginPlay();
 }
 
+void AOWB_EV_Chunk::BindToOpenWOrldBakery(UOpenWorldBakery* OpenWorldBakery, int ChunkX, int ChunkY) {
+	OWB = OpenWorldBakery;
+	if (ensureMsgf(OWB != nullptr, TEXT("Open world bakery not set, unsafe chunks setup - can not check - can not check validity")))
+		if (ensureMsgf(OWB->ChunksLayaut.XChunks > 0, TEXT("Open world bakery haven't executed CookChunks() yet, unsafe chunks setup - can not check validity")))
+			ensureMsgf(OWB->ChunksLayaut.XChunks >= ChunkX && OWB->ChunksLayaut.YChunks >= ChunkY, TEXT("You set wrong chunk %i:%i. Only %i:%i available"), ChunkX, ChunkY, OWB->ChunksLayaut.XChunks, OWB->ChunksLayaut.YChunks);
+	if (ensureMsgf(ChunkX >= 0 && ChunkY >= 0, TEXT("Invalid chunks adress"))) {
+		ChunkX_ = ChunkX;
+		ChunkY_ = ChunkY;
+		MyChunkDescr = &OpenWorldBakery->Chunks[ChunkY_ * OWB->ChunksLayaut.XChunks + ChunkX_];
+	}
+	DensityBuilder->BindToOpenWOrldBakery(OWB);
+	DensityBuilder->SetChunk(ChunkX, ChunkY);
+
+	MCSettings.Resolution = WorldVisualizer->VoxelSize;
+}
+
+void AOWB_EV_Chunk::InitTerrainBuild()
+{
+	if (!ensureMsgf(ChunkX_ > 0, TEXT("Call BindToOpenWOrldBakery() first"))) {
+		State = EOWBEVChunkStates::OWBEV_Idle;
+		return;
+	}
+	State = EOWBEVChunkStates::OWBEV_Working;
+	if (MyChunkDescr->Blocks.Num() > 0) {
+		PlaceOcean();
+		CurLayer = OWBVoxelBlockMin;
+//		DoBuildTerrainLayer();
+	}
+}
+
+void AOWB_EV_Chunk::PlaceOcean() {
+	if (!MyChunkDescr->Blocks.Contains(Ocean))
+		return;
+	FOWBMeshChunk& OceanChunk = MyChunkDescr->Blocks[Ocean];
+	FTransform MyTransform;
+	MyTransform.SetScale3D({ 10,10,10.0 });
+	AActor* APlaneActor = GetWorld()->SpawnActor(WorldVisualizer->OceanPlaneBP);
+	APlaneActor->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+	APlaneActor->AddActorLocalTransform(MyTransform);
+}
+
+void AOWB_EV_Chunk::DrawFInished() {
+	State = EOWBEVChunkStates::OWBEV_Idle;
+}
+
+void AOWB_EV_Chunk::DoBuildTerrainLayer(){
+
+	LayerToDraw = EOWBMeshBlockTypes::Ocean;
+	int8 LayerIterator = CurLayer;
+
+	while (LayerIterator < EOWBMeshBlockTypes::OWBVoxelBlockMax) {
+		if (MyChunkDescr->Blocks.Contains(CurLayer)) {
+			LayerToDraw = CurLayer;
+		}
+		LayerIterator++;
+		if (LayerToDraw != EOWBMeshBlockTypes::Ocean)
+			break;
+	}
+	CurLayer = (EOWBMeshBlockTypes)LayerIterator;
+	
+	if (LayerToDraw != EOWBMeshBlockTypes::Ocean) {
+		DensityBuilder->SetLayer(LayerToDraw);
+		FOWBMeshChunk& LayerChunk = MyChunkDescr->Blocks[LayerToDraw];
+
+		MCSettings.Units = FIntVector(
+			LayerChunk.MaxPoint.X - LayerChunk.MinPoint.X + 2,
+			LayerChunk.MaxPoint.Y - LayerChunk.MinPoint.Y + 2,
+			(LayerChunk.MaxHeight - LayerChunk.MinHeight) / OWB->CellWidth + 2.5001
+		);
+
+		FVector MeshLocation = { WorldVisualizer->VoxelSize, WorldVisualizer->VoxelSize ,WorldVisualizer->VoxelSize };
+		MeshLocation.X *= LayerChunk.MinPoint.X - ChunkX_ * OWB->ChunksLayaut.ChunkWidth - 1;
+		MeshLocation.Y *= LayerChunk.MinPoint.Y - ChunkY_ * OWB->ChunksLayaut.ChunkHeight - 1;
+
+		MeshLocation.Z *= LayerChunk.MinHeight / OWB->CellWidth;
+
+		ProceduralMesh[LayerToDraw]->SetRelativeLocation(MeshLocation);
+
+		WorkerCubes = MakeShareable(new FMarchingCubes({}, DensityBuilder, MCSettings, { 0,0,0 }));
+
+		TFunction<void()> BodyFunction = [this]
+		{
+			WorkerCubes->GenerateVoxelData();
+		};
+
+		TFunction<void()> OnCompleteFunction = [this]
+		{
+			AsyncTask(ENamedThreads::GameThread, [this]()
+				{
+					WorkerMesh = MakeShareable(new FVoxelDataConverter(
+						WorkerCubes->Coordinates,
+						WorkerCubes->Triangles,
+						{},
+						DensityBuilder,
+						MCSettings,
+						WorkerCubes->ChunkSlot,
+						false, false //const bool UseGradientNormals, const bool UseFlatShading
+					));
+					//WorkerCubes.Reset();
+					//WorkerCubes = nullptr;
+					TFunction<void()> BodyFunction2 = [this]
+					{
+						WorkerMesh->ConvertToMeshData();
+					};
+
+					TFunction<void()> OnCompleteFunction2 = [this]
+					{
+						AsyncTask(ENamedThreads::GameThread, [this]()
+							{
+								EndTerrainBuild(WorkerMesh->MeshData);
+								//WorkerMesh.Reset();
+								//WorkerMesh = nullptr;
+							});
+					};
+					//WorkerMesh->ConvertToMeshData();
+					//EndTerrainBuild(WorkerMesh->MeshData);
+					WorkerMesh->StartWork(BodyFunction2, OnCompleteFunction2, nullptr);
+				});
+		};
+
+		WorkerCubes->StartWork(BodyFunction, OnCompleteFunction, nullptr);
+	}
+	DrawFInished();
+}
+
+
+void AOWB_EV_Chunk::EndTerrainBuild(const FMeshData& AMeshData){
+	WorldVisualizer->MeshGeneratorLock.Lock();
+	ProceduralMesh[LayerToDraw]->CreateMeshSection_LinearColor(0, AMeshData.Vertices, AMeshData.Triangles, AMeshData.Normals, AMeshData.UV0, AMeshData.Colors, AMeshData.Tangents, true);
+	WorldVisualizer->MeshGeneratorLock.Unlock();
+
+	if (CurLayer < OWBVoxelBlockMax) {
+		DoBuildTerrainLayer();
+	} else {
+		State = EOWBEVChunkStates::OWBEV_Idle;
+	}
+}
+
+void AOWB_EV_Chunk::Tick(float DeltaTime) {
+}
+
+
 //// Called every frame
 //void ATerrainVoxel::Tick(float DeltaTime)
 //{
 //	Super::Tick(DeltaTime);
 //	if (CleanupMesh) {
-//		NewPMC->ClearAllMeshSections();
+//		ProceduralMesh->ClearAllMeshSections();
 //		CleanupMesh = false;
 //	}
 //}
@@ -197,16 +360,16 @@ void AOWB_EV_Chunk::BeginPlay()
 //	//// ============================================
 //
 //	SharedMeshGenLock->Lock();
-//	NewPMC->CreateMeshSection_LinearColor(0, AMeshData.Vertices, AMeshData.Triangles, AMeshData.Normals, AMeshData.UV0, AMeshData.Colors, AMeshData.Tangents, true);
+//	ProceduralMesh->CreateMeshSection_LinearColor(0, AMeshData.Vertices, AMeshData.Triangles, AMeshData.Normals, AMeshData.UV0, AMeshData.Colors, AMeshData.Tangents, true);
 //	SharedMeshGenLock->Unlock();
 //
-//	NewPMC->CastShadow = 0;
+//	ProceduralMesh->CastShadow = 0;
 //	if (DynamicMaterial != nullptr) {
-//		NewPMC->SetMaterial(0, DynamicMaterial);
+//		ProceduralMesh->SetMaterial(0, DynamicMaterial);
 //		if (CookBitmaps)
 //			RefreshDebugBitmap();
 //	} else {
-//		NewPMC->SetMaterial(0, StaticMaterial);
+//		ProceduralMesh->SetMaterial(0, StaticMaterial);
 //	}
 //
 //	if (Next != nullptr)

@@ -1,7 +1,7 @@
 #pragma once
 #include "CoreMinimal.h"
 #include "MarchingCubes.h"
-#include "OWB_DencityDataBuilder.h"
+#include "OWB_EV_ChunkVisualizer.h"
 #include "OpenWorldBakery.h"
 #include "utility/OpenWorldBakeryHeightmapDebugMapping.h"
 #include "Components/SceneComponent.h"
@@ -20,6 +20,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration", meta = (ClampMin = "16"))
 	int MapResolution = 128;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration", meta = (ClampMin = "0.1"))
+	float VoxelSize = 5;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration", meta = (ClampMin = "1"))
 	int CutChunks = 2;
@@ -42,9 +45,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
 	UOpenWorldBakery* OpenWorldBakery;
 
+	UPROPERTY(EditDefaultsOnly, Category = "LandscapeGeneration")
+	TSubclassOf<AActor> OceanPlaneBP;
+
+	FCriticalSection MeshGeneratorLock;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	FCriticalSection MeshGenLock;
 	
@@ -69,8 +78,6 @@ protected:
 private:
 //	FVoxelSettings Voxel;
 	UPROPERTY()
-	UOWBDensityDataBuilder* GroundDensityBuilder = nullptr;
-	UPROPERTY()
-	UOWBDensityDataBuilder* WaterDensityBuilder = nullptr;
+	TArray<AOWB_EV_Chunk*> ChunksVisualizers;
 };
 

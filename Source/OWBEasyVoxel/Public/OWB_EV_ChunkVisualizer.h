@@ -7,16 +7,23 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ProceduralMeshComponent.h"
+#include "OpenWorldBakery.h"
+#include "OWB_DencityDataBuilder.h"
+#include "EasyVoxelsMCLibrary.h"
+#include "VoxelLib/VoxelDataConverter.h"
+
 //#include "MarchingCubes.h"
 //#include "Materials/MaterialInstanceDynamic.h"
-//#include "EasyVoxelsMCLibrary.h"
-//#include "VoxelLib/VoxelDataConverter.h"
 //#include "HeightMapTerrain/UnrealRandomHeightMap.h"
 //#include "RuntimeMeshComponent.h"
 //#include "RuntimeMeshActor.h"
 //#include "APIs/EasyVoxelMC_DencityDataBuilder.h"
-#include "OWB_EV_ChunkVisualizer.generated.h"
 
+#include "OWB_EV_ChunkVisualizer.generated.h"
+class UOWB_EV_WorldVisializer;
+
+UENUM(BlueprintType, Category = "Open World Bakery|Enums")
+enum EOWBEVChunkStates { OWBEV_Idle, OWBEV_Pending, OWBEV_Working };
 
 UCLASS()
 class OWBEASYVOXEL_API AOWB_EV_Chunk : public AActor //ARuntimeMeshActor
@@ -26,27 +33,59 @@ class OWBEASYVOXEL_API AOWB_EV_Chunk : public AActor //ARuntimeMeshActor
 public:	
 	// Sets default values for this actor's properties
 	AOWB_EV_Chunk();
-
-protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
+	TMap<TEnumAsByte<EOWBMeshBlockTypes>,UProceduralMeshComponent*> ProceduralMesh;
 
-public:	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
-	UProceduralMeshComponent* NewPMC;
-//
+	UFUNCTION(BlueprintCallable, Category = "OpenWorldBakery")
+	void BindToOpenWOrldBakery(UOpenWorldBakery* OpenWorldBakery, int ChunkX, int ChunkY);
+
+
+	UFUNCTION(BlueprintCallable, Category = "OpenWorldBakery")
+	void InitTerrainBuild();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
+	TEnumAsByte<EOWBEVChunkStates> State = EOWBEVChunkStates::OWBEV_Idle;
+
+	virtual void Tick(float DeltaTime) override;
+	UOWB_EV_WorldVisializer* WorldVisualizer;
+
+private:
+	UPROPERTY()
+	UOWBDensityDataBuilder* DensityBuilder = nullptr;
+
+	UPROPERTY()
+	UOpenWorldBakery* OWB = nullptr;
+
+	int ChunkX_ = -1;
+	int ChunkY_ = -1;
+	EOWBMeshBlockTypes LayerToDraw;
+
+	void EndTerrainBuild(const FMeshData& AMeshData);
+
+	TSharedPtr<FVoxelDataConverter, ESPMode::ThreadSafe> WorkerMesh = nullptr;
+	TSharedPtr<FMarchingCubes, ESPMode::ThreadSafe> WorkerCubes = nullptr;
+
+	FVoxelSettings MCSettings;
+	TArray<EOWBMeshBlockTypes> LayersDoDraw;
+	EOWBMeshBlockTypes CurLayer = OWBVoxelBlockMin;
+	
+	FOWBMeshBlocks_set* MyChunkDescr;
+
+	void DoBuildTerrainLayer();
+	void PlaceOcean();
+	void DrawFInished();
+
+
+
+	//
 //	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
 //	//URuntimeMeshComponent* StaticProvider = nullptr;
 //
 //	FIntVector Chunk;
 //	FVoxelSettings MCSettings;
 //	
-//	UPROPERTY()
-//	UHeightmapDensityDataBuilder* DensityBuilder = nullptr;
-//
-//	UPROPERTY()
-//	URandomHeightMap* RHM = nullptr;
-//	bool CookBitmaps = true;
+
 //	
 //	TSharedPtr<FVoxelDataConverter, ESPMode::ThreadSafe> WorkerMesh = nullptr;
 //	TSharedPtr<FMarchingCubes, ESPMode::ThreadSafe> WorkerCubes = nullptr;
@@ -65,7 +104,7 @@ public:
 //	ATerrainVoxel* Next;
 //	int CutChunks;
 //
-//	virtual void Tick(float DeltaTime) override;
+
 //	void InitTerrainBuild();
 //	void RefreshDebugBitmap();
 //private:
