@@ -14,11 +14,11 @@
 AOWB_EV_Chunk::AOWB_EV_Chunk()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	LayersDoDraw.Add(Ground);
-	LayersDoDraw.Add(Lake);
+	LayersToDraw.Add(Ground);
+	LayersToDraw.Add(Lake);
 	//	SetMobility(EComponentMobility::Movable);
 	bool HasRoot = false;
-	for (EOWBMeshBlockTypes& Layer : LayersDoDraw) {
+	for (EOWBMeshBlockTypes& Layer : LayersToDraw) {
 		UProceduralMeshComponent* AProceduralMesh;
 		if (!HasRoot)
 			AProceduralMesh = CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("Procedural mesh"));
@@ -65,27 +65,34 @@ void AOWB_EV_Chunk::BindToOpenWOrldBakery(UOpenWorldBakery* OpenWorldBakery, int
 
 void AOWB_EV_Chunk::InitTerrainBuild()
 {
-	if (!ensureMsgf(ChunkX_ > 0, TEXT("Call BindToOpenWOrldBakery() first"))) {
+	if (!ensureMsgf(ChunkX_ >= 0, TEXT("Call BindToOpenWOrldBakery() first"))) {
 		State = EOWBEVChunkStates::OWBEV_Idle;
 		return;
 	}
 	State = EOWBEVChunkStates::OWBEV_Working;
 	if (MyChunkDescr->Blocks.Num() > 0) {
 		PlaceOcean();
-		CurLayer = OWBVoxelBlockMin;
+		CurLayer = 0;
 //		DoBuildTerrainLayer();
 	}
 }
-
+const float SeaPlaneSize = 100;
 void AOWB_EV_Chunk::PlaceOcean() {
 	if (!MyChunkDescr->Blocks.Contains(Ocean))
 		return;
 	FOWBMeshChunk& OceanChunk = MyChunkDescr->Blocks[Ocean];
+	float Scale = OWB->ChunksLayaut.ChunkWidth * WorldVisualizer->VoxelSize / SeaPlaneSize;
+	FActorSpawnParameters SpamParams;
+	SpamParams.Name = FName(*FString::Printf(TEXT("OceanChunk %i:%i"), ChunkX_, ChunkY_));
+	SpamParams.bNoFail = true;
+
 	FTransform MyTransform;
-	MyTransform.SetScale3D({ 10,10,10.0 });
-	AActor* APlaneActor = GetWorld()->SpawnActor(WorldVisualizer->OceanPlaneBP);
-	APlaneActor->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
-	APlaneActor->AddActorLocalTransform(MyTransform);
+	MyTransform.SetScale3D({ Scale,Scale,10.0 });
+	if (ensureMsgf(WorldVisualizer->OceanPlaneBP != nullptr, TEXT("Ocean plane template not defined, see world generator props"))) {
+		AActor* APlaneActor = GetWorld()->SpawnActor<AActor>(WorldVisualizer->OceanPlaneBP, MyTransform, SpamParams);
+		APlaneActor->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepRelativeTransform);
+		APlaneActor->SetActorRelativeLocation({ SeaPlaneSize /2 * Scale, SeaPlaneSize /2 * Scale, 0});
+	}
 }
 
 void AOWB_EV_Chunk::DrawFInished() {
@@ -95,17 +102,15 @@ void AOWB_EV_Chunk::DrawFInished() {
 void AOWB_EV_Chunk::DoBuildTerrainLayer(){
 
 	LayerToDraw = EOWBMeshBlockTypes::Ocean;
-	int8 LayerIterator = CurLayer;
 
-	while (LayerIterator < EOWBMeshBlockTypes::OWBVoxelBlockMax) {
-		if (MyChunkDescr->Blocks.Contains(CurLayer)) {
-			LayerToDraw = CurLayer;
+	while (CurLayer < LayersToDraw.Num()) {
+		if (MyChunkDescr->Blocks.Contains(LayersToDraw[CurLayer])) {
+			LayerToDraw = LayersToDraw[CurLayer];
 		}
-		LayerIterator++;
+		CurLayer++;
 		if (LayerToDraw != EOWBMeshBlockTypes::Ocean)
 			break;
 	}
-	CurLayer = (EOWBMeshBlockTypes)LayerIterator;
 	
 	if (LayerToDraw != EOWBMeshBlockTypes::Ocean) {
 		DensityBuilder->SetLayer(LayerToDraw);
@@ -178,7 +183,7 @@ void AOWB_EV_Chunk::EndTerrainBuild(const FMeshData& AMeshData){
 	ProceduralMesh[LayerToDraw]->CreateMeshSection_LinearColor(0, AMeshData.Vertices, AMeshData.Triangles, AMeshData.Normals, AMeshData.UV0, AMeshData.Colors, AMeshData.Tangents, true);
 	WorldVisualizer->MeshGeneratorLock.Unlock();
 
-	if (CurLayer < OWBVoxelBlockMax) {
+	if (CurLayer < LayersToDraw.Num()) {
 		DoBuildTerrainLayer();
 	} else {
 		State = EOWBEVChunkStates::OWBEV_Idle;

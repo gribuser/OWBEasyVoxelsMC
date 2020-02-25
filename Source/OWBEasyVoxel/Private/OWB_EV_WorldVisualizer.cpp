@@ -2,7 +2,7 @@
 #include "Engine/World.h"
 
 UOWB_EV_WorldVisializer::UOWB_EV_WorldVisializer() {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 }
 
 void UOWB_EV_WorldVisializer::BeginPlay()
@@ -25,17 +25,19 @@ void UOWB_EV_WorldVisializer::TickComponent(float DeltaTime, ELevelTick TickType
 	}
 
 	int ThreadsToStart = FMath::Clamp(OpenWorldBakery->ThreadsToUse - NumWorking, 0, NumPending);
-	for (AOWB_EV_Chunk* Chunk : ChunksVisualizers) {
-		if (Chunk->State == EOWBEVChunkStates::OWBEV_Pending) {
-			Chunk->InitTerrainBuild();
-			ThreadsToStart--;
-			NumPending--;
+	if (ThreadsToStart > 0) {
+		for (AOWB_EV_Chunk* Chunk : ChunksVisualizers) {
+			if (Chunk->State == EOWBEVChunkStates::OWBEV_Pending) {
+				Chunk->InitTerrainBuild();
+				ThreadsToStart--;
+				NumPending--;
+			}
+			if (ThreadsToStart == 0)
+				break;
 		}
-		if (ThreadsToStart == 0)
-			break;
+		//if (NumPending <= 0)
+		//	PrimaryComponentTick.bCanEverTick = false;
 	}
-	if (NumPending <= 0)
-		PrimaryComponentTick.bCanEverTick = false;
 }
 
 void UOWB_EV_WorldVisializer::CreateVisualization() {
@@ -57,11 +59,11 @@ void UOWB_EV_WorldVisializer::CreateVisualization() {
 				NewChunk->SetActorRelativeLocation(NewLocation, false, nullptr, {});
 
 				NewChunk->BindToOpenWOrldBakery(OpenWorldBakery, x, y);
-				NewChunk->State = EOWBEVChunkStates::OWBEV_Idle;
+				NewChunk->State = EOWBEVChunkStates::OWBEV_Pending;
 				ChunksVisualizers.Add(NewChunk);
 			}
 		}
-		PrimaryComponentTick.bCanEverTick = true;
+//		PrimaryComponentTick.bCanEverTick = true;
 	}
 }
 

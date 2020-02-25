@@ -67,8 +67,8 @@ private:
 	TSharedPtr<FMarchingCubes, ESPMode::ThreadSafe> WorkerCubes = nullptr;
 
 	FVoxelSettings MCSettings;
-	TArray<EOWBMeshBlockTypes> LayersDoDraw;
-	EOWBMeshBlockTypes CurLayer = OWBVoxelBlockMin;
+	TArray<EOWBMeshBlockTypes> LayersToDraw;
+	int CurLayer = 0;
 	
 	FOWBMeshBlocks_set* MyChunkDescr;
 
