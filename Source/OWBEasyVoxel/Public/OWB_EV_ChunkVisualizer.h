@@ -51,9 +51,9 @@ public:
 	UOWB_EV_WorldVisializer* WorldVisualizer;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
-	EOWBMeshBlockTypes LayerToDraw;
+	TEnumAsByte<EOWBMeshBlockTypes> LayerToDraw;
 
-//	FOWBMeshBlocks_set* MyChunkDescr;
+	FOWBMeshBlocks_set* ChunkDescr;
 
 private:
 	UPROPERTY()
@@ -73,10 +73,6 @@ private:
 	FVoxelSettings MCSettings;
 	int CurLayer = 0;
 	
-	void DoBuildTerrainLayer();
-	void PlaceOcean();
-	void DrawFInished();
-
 
 
 	//

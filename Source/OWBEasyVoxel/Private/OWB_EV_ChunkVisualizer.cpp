@@ -42,7 +42,6 @@ void AOWB_EV_Chunk::BindToOpenWOrldBakery(UOpenWorldBakery* OpenWorldBakery, int
 	if (ensureMsgf(ChunkX >= 0 && ChunkY >= 0, TEXT("Invalid chunks adress"))) {
 		ChunkX_ = ChunkX;
 		ChunkY_ = ChunkY;
-		MyChunkDescr = &OpenWorldBakery->Chunks[ChunkY_ * OWB->ChunksLayaut.XChunks + ChunkX_];
 	}
 	DensityBuilder->BindToOpenWOrldBakery(OWB);
 	DensityBuilder->SetChunk(ChunkX, ChunkY);
@@ -57,25 +56,9 @@ void AOWB_EV_Chunk::InitTerrainBuild()
 		return;
 	}
 	State = EOWBEVChunkStates::OWBEV_Working;
-	DoBuildTerrainLayer();
-}
 
-void AOWB_EV_Chunk::DoBuildTerrainLayer(){
-
-	LayerToDraw = EOWBMeshBlockTypes::Ocean;
-
-	while (CurLayer < LayersToDraw.Num()) {
-		if (MyChunkDescr->Blocks.Contains(LayersToDraw[CurLayer])) {
-			LayerToDraw = LayersToDraw[CurLayer];
-		}
-		CurLayer++;
-		if (LayerToDraw != EOWBMeshBlockTypes::Ocean)
-			break;
-	}
-	
-	if (LayerToDraw != EOWBMeshBlockTypes::Ocean) {
 		DensityBuilder->SetLayer(LayerToDraw);
-		FOWBMeshChunk& LayerChunk = MyChunkDescr->Blocks[LayerToDraw];
+		FOWBMeshChunk& LayerChunk = ChunkDescr->Blocks[LayerToDraw];
 
 		MCSettings.Units = FIntVector(
 			LayerChunk.MaxPoint.X - LayerChunk.MinPoint.X + 3,
@@ -126,7 +109,6 @@ void AOWB_EV_Chunk::DoBuildTerrainLayer(){
 		};
 
 		WorkerCubes->StartWork(BodyFunction, OnCompleteFunction, nullptr);
-	}
 }
 
 

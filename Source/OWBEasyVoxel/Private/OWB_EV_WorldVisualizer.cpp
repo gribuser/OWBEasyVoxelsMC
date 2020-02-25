@@ -4,7 +4,7 @@
 UOWB_EV_WorldVisializer::UOWB_EV_WorldVisializer() {
 	PrimaryComponentTick.bCanEverTick = true;
 	LayersToDraw.Add(Ground);
-	LayersToDraw.Add(Lake);
+//	LayersToDraw.Add(Lake);
 }
 
 void UOWB_EV_WorldVisializer::BeginPlay()
@@ -62,13 +62,14 @@ void UOWB_EV_WorldVisializer::CreateVisualization() {
 						NewChunk->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
 
 						FVector MeshLocation = { VoxelSize, VoxelSize, VoxelSize };
-						MeshLocation.X *= LayerChunk.MinPoint.X - x * OpenWorldBakery->ChunksLayaut.ChunkWidth - 1;
-						MeshLocation.Y *= LayerChunk.MinPoint.Y - y * OpenWorldBakery->ChunksLayaut.ChunkHeight - 1;
+						MeshLocation.X *= LayerChunk.MinPoint.X - x * OpenWorldBakery->ChunksLayaut.ChunkWidth - 1 + (LayerChunk.MaxPoint.X - LayerChunk.MinPoint.X) / 2;
+						MeshLocation.Y *= LayerChunk.MinPoint.Y - y * OpenWorldBakery->ChunksLayaut.ChunkHeight - 1 + (LayerChunk.MaxPoint.Y - LayerChunk.MinPoint.Y) / 2;
 						MeshLocation.Z *= LayerChunk.MinHeight / OpenWorldBakery->CellWidth;
 
 						NewChunk->SetActorRelativeLocation(MeshLocation, false, nullptr, {});
 						NewChunk->BindToOpenWOrldBakery(OpenWorldBakery, x, y);
 						NewChunk->State = EOWBEVChunkStates::OWBEV_Pending;
+						NewChunk->ChunkDescr = &CurChunksDescr;
 						ChunksVisualizers.Add(NewChunk);
 					}
 				}
@@ -99,6 +100,6 @@ void UOWB_EV_WorldVisializer::PlaceOcean(int X, int Y) {
 	if (ensureMsgf(OceanPlaneBP != nullptr, TEXT("Ocean plane template not defined, see world generator props"))) {
 		AActor* APlaneActor = GetWorld()->SpawnActor<AActor>(OceanPlaneBP, MyTransform);
 		APlaneActor->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
-		APlaneActor->SetActorRelativeLocation({ SeaPlaneSize / 2 * Scale, SeaPlaneSize / 2 * Scale, 0 });
+		APlaneActor->SetActorRelativeLocation({ SeaPlaneSize / 2 * Scale + OpenWorldBakery->ChunksLayaut.ChunkWidth * VoxelSize * X, SeaPlaneSize / 2 * Scale + OpenWorldBakery->ChunksLayaut.ChunkHeight * VoxelSize * Y, 0 });
 	}
 }
