@@ -21,7 +21,6 @@ public:
 
 	virtual FDensityPoint BuildDensityPoint_Implementation(const FIntVector& VoxelCoordinates, const FIntVector& ChunkSlot, const FVoxelSettings& Settings) override;
 private:
-	float CellWidth = 0;
 	UPROPERTY()
 	UOpenWorldBakery* OWB = nullptr;
 	int ChunkX_ = -1;

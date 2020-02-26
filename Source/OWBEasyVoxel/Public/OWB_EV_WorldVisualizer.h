@@ -48,6 +48,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "LandscapeGeneration")
 	TSubclassOf<AActor> OceanPlaneBP;
 
+	UPROPERTY(EditDefaultsOnly, Category = "LandscapeGeneration")
+	TSubclassOf<AActor> ChunkVisualBP;
+
 	FCriticalSection MeshGeneratorLock;
 
 protected:
@@ -82,6 +85,7 @@ private:
 	TArray<EOWBMeshBlockTypes> LayersToDraw;
 
 	void PlaceOcean(int X, int Y);
+	void DrawChunk(FOWBMeshBlocks_set_contents& LayerChunk);
 
 };
 

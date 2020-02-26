@@ -58,12 +58,12 @@ void AOWB_EV_Chunk::InitTerrainBuild()
 	State = EOWBEVChunkStates::OWBEV_Working;
 
 		DensityBuilder->SetLayer(LayerToDraw);
-		FOWBMeshChunk& LayerChunk = ChunkDescr->Blocks[LayerToDraw];
+		FOWBMeshChunk& LayerChunk = ChunkDescr->ChunkContents[LayerToDraw];
 
 		MCSettings.Units = FIntVector(
-			LayerChunk.MaxPoint.X - LayerChunk.MinPoint.X + 3,
-			LayerChunk.MaxPoint.Y - LayerChunk.MinPoint.Y + 3,
-			(LayerChunk.MaxHeight - LayerChunk.MinHeight) / OWB->CellWidth + 3.5001
+			LayerChunk.MaxPoint.X - LayerChunk.MinPoint.X + 2,
+			LayerChunk.MaxPoint.Y - LayerChunk.MinPoint.Y + 2,
+			LayerChunk.MaxPoint.Z - LayerChunk.MinPoint.Z + 2
 		);
 
 		WorkerCubes = MakeShareable(new FMarchingCubes({}, DensityBuilder, MCSettings, { 0,0,0 }));

@@ -31,9 +31,9 @@ FDensityPoint UOWBDensityDataBuilder::BuildDensityPoint_Implementation(const FIn
 
 		if (ChunkX_ >= 0) {
 			FOWBMeshBlocks_set& ChunkDescrs = OWB->Chunks[ChunkX_ + ChunkY_ * OWB->ChunksLayaut.XChunks];
-			if (ChunkDescrs.Blocks.Contains(Layer)) {
-				X += ChunkDescrs.Blocks[Layer].MinPoint.X;
-				Y += ChunkDescrs.Blocks[Layer].MinPoint.Y;
+			if (ChunkDescrs.ChunkContents.Contains(Layer)) {
+				X += ChunkDescrs.ChunkContents[Layer].MinPoint.X;
+				Y += ChunkDescrs.ChunkContents[Layer].MinPoint.Y;
 			} else {
 				return ThisPointData;
 			}
@@ -44,23 +44,24 @@ FDensityPoint UOWBDensityDataBuilder::BuildDensityPoint_Implementation(const FIn
 		//		VoxelCoordinates.X, VoxelCoordinates.Y, VoxelCoordinates.Z,
 		//		ChunkSlot.X, ChunkSlot.Y, ChunkSlot.Z,X,Y,Z);
 
-		if (Z <= 1 || X <= 1 || Y <= 1 || X >= OWB->MapWidth - 1 || Y >= OWB->MapHeight - 1) {
-			return ThisPointData;
-		}
+		//if (Z <= 1 || X <= 1 || Y <= 1 || X >= OWB->MapWidth - 1 || Y >= OWB->MapHeight - 1) {
+		//	return ThisPointData;
+		//}
 
-		Z -= 3;
 		X--;
 		Y--;
+//		Z--;
 
 		OpenWorldBakery::FSquareMeter& Ground = OWB->Ground(X, Y);
 
-		float ThisCellHeight = Ground.GroundElevation * OWB->CellWidth;
+		float ThisCellHeight = Ground.GroundElevation / OWB->CellWidth;
+		#if !UE_BUILD_SHIPPING
 		if (isnan(ThisCellHeight)) {
 			ThisCellHeight = 200000;
 		}
-
-		float BtmLVL = Z * CellWidth;
-		ThisPointData.Value = ThisCellHeight - BtmLVL;
+		#endif
+//		float BtmLVL = OWB->CellWidth * Z;
+		ThisPointData.Value = ThisCellHeight - Z;
 
 	}
 	return ThisPointData;
