@@ -34,6 +34,7 @@ FDensityPoint UOWBDensityDataBuilder::BuildDensityPoint_Implementation(const FIn
 			if (ChunkDescrs.ChunkContents.Contains(Layer)) {
 				X += ChunkDescrs.ChunkContents[Layer].MinPoint.X;
 				Y += ChunkDescrs.ChunkContents[Layer].MinPoint.Y;
+				Z += ChunkDescrs.ChunkContents[Layer].MinPoint.Z;
 			} else {
 				return ThisPointData;
 			}
@@ -50,7 +51,7 @@ FDensityPoint UOWBDensityDataBuilder::BuildDensityPoint_Implementation(const FIn
 
 		X--;
 		Y--;
-//		Z--;
+		Z--;
 
 		OpenWorldBakery::FSquareMeter& Ground = OWB->Ground(X, Y);
 

@@ -4,7 +4,7 @@
 UOWB_EV_WorldVisializer::UOWB_EV_WorldVisializer() {
 	PrimaryComponentTick.bCanEverTick = true;
 	LayersToDraw.Add(Ground);
-	LayersToDraw.Add(Lake);
+	//LayersToDraw.Add(Lake);
 }
 
 void UOWB_EV_WorldVisializer::BeginPlay()
@@ -65,9 +65,9 @@ void UOWB_EV_WorldVisializer::CreateVisualization() {
 						FIntVector ChunkMetrics = LayerChunk.MaxPoint - LayerChunk.MinPoint;
 
 						FVector MeshLocation = { VoxelSize, VoxelSize, VoxelSize };
-						MeshLocation.X *= LayerChunk.MinPoint.X - 1 + ChunkMetrics.X / 2;
-						MeshLocation.Y *= LayerChunk.MinPoint.Y - 1 + ChunkMetrics.Y / 2;
-						MeshLocation.Z *= LayerChunk.MinPoint.Z - 1 + ChunkMetrics.Z / 2;
+						MeshLocation.X *= LayerChunk.MinPoint.X - 1 + 0.5 * ChunkMetrics.X;
+						MeshLocation.Y *= LayerChunk.MinPoint.Y - 1 + 0.5 * ChunkMetrics.Y;
+						MeshLocation.Z *= LayerChunk.MinPoint.Z - 1 + 0.5 * ChunkMetrics.Z;
 
 						NewChunk->SetActorRelativeLocation(MeshLocation, false, nullptr, {});
 						NewChunk->BindToOpenWOrldBakery(OpenWorldBakery, x, y);
@@ -86,7 +86,7 @@ void UOWB_EV_WorldVisializer::CreateVisualization() {
 }
 
 void UOWB_EV_WorldVisializer::DrawChunk(FOWBMeshBlocks_set_contents& LayerChunk) {
-	if (ChunkVisualBP != nullptr && LayerChunk.BlocksType == Lake) {
+	if (ChunkVisualBP != nullptr) {
 		for (FOWBMeshChunk& Microchunk : LayerChunk.TypedBlocks) {
 			FIntVector ChunkMetrics = LayerChunk.MaxPoint - LayerChunk.MinPoint;
 
