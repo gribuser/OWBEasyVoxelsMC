@@ -45,9 +45,9 @@ FDensityPoint UOWBDensityDataBuilder::BuildDensityPoint_Implementation(const FIn
 		//		VoxelCoordinates.X, VoxelCoordinates.Y, VoxelCoordinates.Z,
 		//		ChunkSlot.X, ChunkSlot.Y, ChunkSlot.Z,X,Y,Z);
 
-		//if (Z <= 1 || X <= 1 || Y <= 1 || X >= OWB->MapWidth - 1 || Y >= OWB->MapHeight - 1) {
-		//	return ThisPointData;
-		//}
+		if (X <= 0 || Y <= 0 || X >= OWB->MapWidth - 1 || Y >= OWB->MapHeight - 1) {
+			return ThisPointData;
+		}
 
 		X--;
 		Y--;
