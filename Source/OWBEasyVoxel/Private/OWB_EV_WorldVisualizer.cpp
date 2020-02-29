@@ -88,7 +88,7 @@ void UOWB_EV_WorldVisializer::CreateVisualization() {
 void UOWB_EV_WorldVisializer::DrawChunk(FOWBMeshBlocks_set_contents& LayerChunk) {
 	if (ChunkVisualBP != nullptr) {
 		for (FOWBMeshChunk& Microchunk : LayerChunk.TypedBlocks) {
-			FIntVector ChunkMetrics = LayerChunk.MaxPoint - LayerChunk.MinPoint;
+			FIntVector ChunkMetrics = Microchunk.MaxPoint - Microchunk.MinPoint;
 
 			FVector ScaleVect(ChunkMetrics.X, ChunkMetrics.Y, ChunkMetrics.Z);
 			ScaleVect *= VoxelSize / 100;
