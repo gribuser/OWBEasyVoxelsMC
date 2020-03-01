@@ -57,58 +57,61 @@ void AOWB_EV_Chunk::InitTerrainBuild()
 	}
 	State = EOWBEVChunkStates::OWBEV_Working;
 
-		DensityBuilder->SetLayer(LayerToDraw);
-		FOWBMeshChunk& LayerChunk = ChunkDescr->ChunkContents[LayerToDraw];
+	DensityBuilder->SetLayer(LayerToDraw);
+	FOWBMeshChunk& LayerChunk = ChunkDescr->ChunkContents[LayerToDraw];
 
-		MCSettings.Units = FIntVector(
-			LayerChunk.MaxPoint.X - LayerChunk.MinPoint.X + 2,
-			LayerChunk.MaxPoint.Y - LayerChunk.MinPoint.Y + 2,
-			LayerChunk.MaxPoint.Z - LayerChunk.MinPoint.Z + 2
-		);
+	MCSettings.Units = LayerChunk.MaxPoint - LayerChunk.MinPoint;
 
-		WorkerCubes = MakeShareable(new FMarchingCubes({}, DensityBuilder, MCSettings, { 0,0,0 }));
+	if (MCSettings.Units.X == 0 || MCSettings.Units.Y == 0 || MCSettings.Units.Z == 0) {
+		State = EOWBEVChunkStates::OWBEV_Idle;
+		return;
+	}
 
-		TFunction<void()> BodyFunction = [this]
-		{
-			WorkerCubes->GenerateVoxelData();
-		};
+	MCSettings.Units = MCSettings.Units + FIntVector(2, 2, 2);
+	
+	WorkerCubes = MakeShareable(new FMarchingCubes({}, DensityBuilder, MCSettings, { 0,0,0 }));
 
-		TFunction<void()> OnCompleteFunction = [this]
-		{
-			AsyncTask(ENamedThreads::GameThread, [this]()
+	TFunction<void()> BodyFunction = [this]
+	{
+		WorkerCubes->GenerateVoxelData();
+	};
+
+	TFunction<void()> OnCompleteFunction = [this]
+	{
+		AsyncTask(ENamedThreads::GameThread, [this]()
+			{
+				WorkerMesh = MakeShareable(new FVoxelDataConverter(
+					WorkerCubes->Coordinates,
+					WorkerCubes->Triangles,
+					{},
+					DensityBuilder,
+					MCSettings,
+					WorkerCubes->ChunkSlot,
+					false, false //const bool UseGradientNormals, const bool UseFlatShading
+				));
+				//WorkerCubes.Reset();
+				//WorkerCubes = nullptr;
+				TFunction<void()> BodyFunction2 = [this]
 				{
-					WorkerMesh = MakeShareable(new FVoxelDataConverter(
-						WorkerCubes->Coordinates,
-						WorkerCubes->Triangles,
-						{},
-						DensityBuilder,
-						MCSettings,
-						WorkerCubes->ChunkSlot,
-						false, false //const bool UseGradientNormals, const bool UseFlatShading
-					));
-					//WorkerCubes.Reset();
-					//WorkerCubes = nullptr;
-					TFunction<void()> BodyFunction2 = [this]
-					{
-						WorkerMesh->ConvertToMeshData();
-					};
+					WorkerMesh->ConvertToMeshData();
+				};
 
-					TFunction<void()> OnCompleteFunction2 = [this]
-					{
-						AsyncTask(ENamedThreads::GameThread, [this]()
-							{
-								EndTerrainBuild(WorkerMesh->MeshData);
-								//WorkerMesh.Reset();
-								//WorkerMesh = nullptr;
-							});
-					};
-					//WorkerMesh->ConvertToMeshData();
-					//EndTerrainBuild(WorkerMesh->MeshData);
-					WorkerMesh->StartWork(BodyFunction2, OnCompleteFunction2, nullptr);
-				});
-		};
+				TFunction<void()> OnCompleteFunction2 = [this]
+				{
+					AsyncTask(ENamedThreads::GameThread, [this]()
+						{
+							EndTerrainBuild(WorkerMesh->MeshData);
+							//WorkerMesh.Reset();
+							//WorkerMesh = nullptr;
+						});
+				};
+				//WorkerMesh->ConvertToMeshData();
+				//EndTerrainBuild(WorkerMesh->MeshData);
+				WorkerMesh->StartWork(BodyFunction2, OnCompleteFunction2, nullptr);
+			});
+	};
 
-		WorkerCubes->StartWork(BodyFunction, OnCompleteFunction, nullptr);
+	WorkerCubes->StartWork(BodyFunction, OnCompleteFunction, nullptr);
 }
 
 

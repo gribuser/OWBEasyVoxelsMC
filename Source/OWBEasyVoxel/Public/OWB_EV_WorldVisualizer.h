@@ -49,6 +49,9 @@ public:
 	TSubclassOf<AActor> OceanPlaneBP;
 
 	UPROPERTY(EditDefaultsOnly, Category = "LandscapeGeneration")
+	TSubclassOf<AActor> OceandeepPlaneBP;
+
+	UPROPERTY(EditDefaultsOnly, Category = "LandscapeGeneration")
 	TSubclassOf<AActor> ChunkVisualBP;
 
 	FCriticalSection MeshGeneratorLock;
@@ -71,7 +74,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, Category = "LandscapeGeneration")
 	FDebugTextureParams DebugTextureParams;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, Category = "LandscapeGeneration")
+	TArray<FIntPoint> DebugVoxels;
+
 	UFUNCTION(BlueprintCallable, Category = "LandscapeGeneration")
 	void RemoveVisualization();
 
@@ -82,10 +88,15 @@ private:
 //	FVoxelSettings Voxel;
 	UPROPERTY()
 	TArray<AOWB_EV_Chunk*> ChunksVisualizers;
+
+	UPROPERTY()
+	TArray<AActor*> ChunksAdditionalActors;
+
+
 	TArray<EOWBMeshBlockTypes> LayersToDraw;
 
-	void PlaceOcean(int X, int Y);
-	void DrawChunk(FOWBMeshBlocks_set_contents& LayerChunk);
+	void PlaceOcean(int X, int Y, bool Water);
+	void DrawChunkBox(FOWBMeshBlocks_set_contents& LayerChunk);
 
 };
 

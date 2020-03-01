@@ -56,7 +56,7 @@ void UOWB_EV_WorldVisializer::CreateVisualization() {
 				for (EOWBMeshBlockTypes& Layer : LayersToDraw) {
 					if (CurChunksDescr.ChunkContents.Contains(Layer)) {
 						FOWBMeshBlocks_set_contents& LayerChunk = CurChunksDescr.ChunkContents[Layer];
-						DrawChunk(LayerChunk);
+						DrawChunkBox(LayerChunk);
 						AOWB_EV_Chunk* NewChunk = GetWorld()->SpawnActor<AOWB_EV_Chunk>();
 						NewChunk->WorldVisualizer = this;
 						NewChunk->LayerToDraw = Layer;
@@ -74,18 +74,24 @@ void UOWB_EV_WorldVisializer::CreateVisualization() {
 						NewChunk->State = EOWBEVChunkStates::OWBEV_Pending;
 						NewChunk->ChunkDescr = &CurChunksDescr;
 						ChunksVisualizers.Add(NewChunk);
+
+						if (Layer == Ground && LayerChunk.MinPoint.Z == (int)(OpenWorldBakery::OceanDeep /OpenWorldBakery->CellWidth - 1)) {
+							PlaceOcean(x, y, false);
+						}
 					}
 				}
-				if (CurChunksDescr.ChunkContents.Contains(EOWBMeshBlockTypes::Ocean)) {
-					PlaceOcean(x, y);
-				}
+				if (CurChunksDescr.ChunkContents.Contains(EOWBMeshBlockTypes::Ocean))
+					PlaceOcean(x, y, true);
+
+				if (!CurChunksDescr.ChunkContents.Contains(EOWBMeshBlockTypes::Ground))
+					PlaceOcean(x, y, false);
 			}
 		}
 //		PrimaryComponentTick.bCanEverTick = true;
 	}
 }
 
-void UOWB_EV_WorldVisializer::DrawChunk(FOWBMeshBlocks_set_contents& LayerChunk) {
+void UOWB_EV_WorldVisializer::DrawChunkBox(FOWBMeshBlocks_set_contents& LayerChunk) {
 	if (ChunkVisualBP != nullptr) {
 		for (FOWBMeshChunk& Microchunk : LayerChunk.TypedBlocks) {
 			FIntVector ChunkMetrics = Microchunk.MaxPoint - Microchunk.MinPoint;
@@ -104,28 +110,39 @@ void UOWB_EV_WorldVisializer::DrawChunk(FOWBMeshBlocks_set_contents& LayerChunk)
 			MeshLocation.Z *= Microchunk.MinPoint.Z + ChunkMetrics.Z / 2;
 
 			NewChunkBox->SetActorRelativeLocation(MeshLocation, false, nullptr, {});
+			ChunksAdditionalActors.Add(NewChunkBox);
 		}
 	}
 }
 
 void UOWB_EV_WorldVisializer::RemoveVisualization() {
 	// ...
-	for (AOWB_EV_Chunk* ChunkInWorld : ChunksVisualizers) {
-		ChunkInWorld->ConditionalBeginDestroy();
-	}
+	for (AOWB_EV_Chunk* ChunkInWorld : ChunksVisualizers)
+		ChunkInWorld->Destroy();
 	ChunksVisualizers.Empty();
+
+	for (AActor* Actor : ChunksAdditionalActors) 
+		Actor->Destroy();
+	ChunksAdditionalActors.Empty();
 }
 
 const float SeaPlaneSize = 100;
-void UOWB_EV_WorldVisializer::PlaceOcean(int X, int Y) {
+void UOWB_EV_WorldVisializer::PlaceOcean(int X, int Y, bool Water) {
 	float Scale = OpenWorldBakery->ChunksLayaut.ChunkWidth * VoxelSize / SeaPlaneSize;
 	FActorSpawnParameters SpamParams;
 
 	FTransform MyTransform;
 	MyTransform.SetScale3D({ Scale,Scale,10.0 });
-	if (ensureMsgf(OceanPlaneBP != nullptr, TEXT("Ocean plane template not defined, see world generator props"))) {
-		AActor* APlaneActor = GetWorld()->SpawnActor<AActor>(OceanPlaneBP, MyTransform);
+
+	TSubclassOf<AActor> ActorToSpawn = Water ? OceanPlaneBP : OceandeepPlaneBP;
+
+	if (ensureMsgf(ActorToSpawn != nullptr, TEXT("Ocean plane template not defined, see world generator props"))) {
+		AActor* APlaneActor = GetWorld()->SpawnActor<AActor>(ActorToSpawn, MyTransform);
 		APlaneActor->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
-		APlaneActor->SetActorRelativeLocation({ SeaPlaneSize / 2 * Scale + OpenWorldBakery->ChunksLayaut.ChunkWidth * VoxelSize * X, SeaPlaneSize / 2 * Scale + OpenWorldBakery->ChunksLayaut.ChunkHeight * VoxelSize * Y, 0 });
+		APlaneActor->SetActorRelativeLocation({
+			SeaPlaneSize / 2 * Scale + OpenWorldBakery->ChunksLayaut.ChunkWidth * VoxelSize * X,
+			SeaPlaneSize / 2 * Scale + OpenWorldBakery->ChunksLayaut.ChunkHeight * VoxelSize * Y,
+			Water ? 0 : (float)(OpenWorldBakery::OceanDeep / OpenWorldBakery->CellWidth * VoxelSize) });
+		ChunksAdditionalActors.Add(APlaneActor);
 	}
 }
