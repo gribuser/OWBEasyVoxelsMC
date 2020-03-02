@@ -1,10 +1,10 @@
 #include "OWB_EV_WorldVisualizer.h"
-#include "Engine/World.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 UOWB_EV_WorldVisializer::UOWB_EV_WorldVisializer() {
 	PrimaryComponentTick.bCanEverTick = true;
 	LayersToDraw.Add(Ground);
-	//LayersToDraw.Add(Lake);
+	LayersToDraw.Add(Lake);
 }
 
 void UOWB_EV_WorldVisializer::BeginPlay()
@@ -72,6 +72,13 @@ void UOWB_EV_WorldVisializer::CreateVisualization() {
 						NewChunk->SetActorRelativeLocation(MeshLocation, false, nullptr, {});
 						NewChunk->BindToOpenWOrldBakery(OpenWorldBakery, x, y);
 						NewChunk->State = EOWBEVChunkStates::OWBEV_Pending;
+
+						if (TypedMaterials.Contains(Layer))
+							NewChunk->Material = UMaterialInstanceDynamic::Create(TypedMaterials[Layer], this);
+
+						if (DebugMaterialTemplate != nullptr && DebugBitmapForThis(x,y))
+							NewChunk->DebugMaterial = UMaterialInstanceDynamic::Create(DebugMaterialTemplate, this);
+
 						NewChunk->ChunkDescr = &CurChunksDescr;
 						ChunksVisualizers.Add(NewChunk);
 
@@ -89,6 +96,16 @@ void UOWB_EV_WorldVisializer::CreateVisualization() {
 		}
 //		PrimaryComponentTick.bCanEverTick = true;
 	}
+}
+
+bool UOWB_EV_WorldVisializer::DebugBitmapForThis(int x, int y) {
+	if (DebugVoxels.Num() == 0)
+		return true;
+	for (FIntPoint& DVox : DebugVoxels) {
+		if (DVox.X == x && DVox.Y == y)
+			return true;
+	}
+	return false;
 }
 
 void UOWB_EV_WorldVisializer::DrawChunkBox(FOWBMeshBlocks_set_contents& LayerChunk) {

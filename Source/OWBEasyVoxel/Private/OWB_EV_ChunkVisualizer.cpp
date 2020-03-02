@@ -4,6 +4,7 @@
 
 #include "OWB_EV_ChunkVisualizer.h"
 #include "OWB_EV_WorldVisualizer.h"
+#include "Materials/MaterialInstanceDynamic.h"
 //#include "Components/StaticMeshComponent.h"
 //#include "VoxelLib/VoxelDataConverter.h"
 //#include "RuntimeMeshActor.h"
@@ -87,7 +88,7 @@ void AOWB_EV_Chunk::InitTerrainBuild()
 					DensityBuilder,
 					MCSettings,
 					WorkerCubes->ChunkSlot,
-					false, false //const bool UseGradientNormals, const bool UseFlatShading
+					true, false //const bool UseGradientNormals, const bool UseFlatShading
 				));
 				//WorkerCubes.Reset();
 				//WorkerCubes = nullptr;
@@ -119,6 +120,35 @@ void AOWB_EV_Chunk::EndTerrainBuild(const FMeshData& AMeshData){
 	WorldVisualizer->MeshGeneratorLock.Lock();
 	ProceduralMesh->CreateMeshSection_LinearColor(0, AMeshData.Vertices, AMeshData.Triangles, AMeshData.Normals, AMeshData.UV0, AMeshData.Colors, AMeshData.Tangents, true);
 	WorldVisualizer->MeshGeneratorLock.Unlock();
+	//if (DebugMaterial != nullptr) {
+
+	//}
+	//else if (Material != nullptr) {
+		ProceduralMesh->SetMaterial(0, Material);
+		Material->SetScalarParameterValue(TEXT("GridScale"), 0.1f / MCSettings.Resolution);
+		FOWBMeshChunk& LayerChunk = ChunkDescr->ChunkContents[LayerToDraw];
+		float CenterX = (float)(LayerChunk.MinPoint.X + LayerChunk.MaxPoint.X) / 2 - 1;
+		float Grid5xPosX = (LayerChunk.MinPoint.X / 10) * 10 + 5;
+		float ShiftX = CenterX / 10;
+//		float ShiftX = (Grid5xPosX - CenterX) / MCSettings.Units.X;
+
+		float CenterY = (float)(LayerChunk.MinPoint.Y + LayerChunk.MaxPoint.Y) / 2 - 1;
+		float Grid5xPosY = (LayerChunk.MinPoint.Y / 10) * 10 + 5;
+		float ShiftY = CenterY / 10;
+//		float ShiftY = (Grid5xPosY - CenterY) / MCSettings.Units.Y;
+
+		//float ShiftX = (float)(LayerChunk.MinPoint.X % 10) / 10;
+		//float ShiftY = (float)(LayerChunk.MinPoint.Y % 10) / 10;
+//		float ShiftX = MCSettings.Units.X * MCSettings.Resolution / 2 - MCSettings.Resolution / 2;
+		//float ShiftY = MCSettings.Units.Y * MCSettings.Resolution / 2 - MCSettings.Resolution / 2;
+		Material->SetVectorParameterValue(TEXT("GridShift"), { ShiftX, ShiftY, 0});
+		//DynamicMaterial->SetScalarParameterValue(TEXT("TextureScale"), MapRescale);
+		//DynamicMaterial->SetScalarParameterValue(TEXT("GridScale"), (float)1 / MCSettings.Resolution / 10);
+		//DynamicMaterial->SetTextureParameterValue(
+		//	TEXT("ColorMap"),
+		//	DebugTexture
+		//);
+//	}
 
 	State = EOWBEVChunkStates::OWBEV_Idle;
 }

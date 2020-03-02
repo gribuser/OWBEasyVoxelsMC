@@ -66,17 +66,17 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
 	float ChunkSize = 5;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
-	UMaterial* ColoredMeshMaterialTemplate;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
-	UMaterialInstance* WaterMaterial;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, Category = "LandscapeGeneration")
 	FDebugTextureParams DebugTextureParams;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, Category = "LandscapeGeneration")
 	TArray<FIntPoint> DebugVoxels;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
+	UMaterialInterface* DebugMaterialTemplate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
+	TMap<TEnumAsByte<EOWBMeshBlockTypes>, UMaterialInterface*> TypedMaterials;
 
 	UFUNCTION(BlueprintCallable, Category = "LandscapeGeneration")
 	void RemoveVisualization();
@@ -97,6 +97,7 @@ private:
 
 	void PlaceOcean(int X, int Y, bool Water);
 	void DrawChunkBox(FOWBMeshBlocks_set_contents& LayerChunk);
+	bool DebugBitmapForThis(int x, int y);
 
 };
 

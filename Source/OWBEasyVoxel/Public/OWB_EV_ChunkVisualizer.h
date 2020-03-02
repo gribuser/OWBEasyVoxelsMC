@@ -53,6 +53,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
 	TEnumAsByte<EOWBMeshBlockTypes> LayerToDraw;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
+	UMaterialInstanceDynamic* DebugMaterial;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
+	UMaterialInstanceDynamic* Material;
+
+
 	FOWBMeshBlocks_set* ChunkDescr;
 
 private:

@@ -55,7 +55,10 @@ FDensityPoint UOWBDensityDataBuilder::BuildDensityPoint_Implementation(const FIn
 
 		OpenWorldBakery::FSquareMeter& Ground = OWB->Ground(X, Y);
 
-		float ThisCellHeight = Ground.GroundElevation / OWB->CellWidth;
+		double ThisCellHeight = Ground.TerrainHeightByType(Layer) / OWB->CellWidth;
+		if (Layer == EOWBMeshBlockTypes::Ground && ThisCellHeight <= OpenWorldBakery::OceanDeep) {
+			ThisCellHeight -= 0.001; // hack to supress blinking
+		}
 		#if !UE_BUILD_SHIPPING
 		if (isnan(ThisCellHeight)) {
 			ThisCellHeight = 200000;
