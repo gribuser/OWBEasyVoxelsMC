@@ -43,7 +43,7 @@ public:
 	int TerrainSeed = 2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
-	UOpenWorldBakery* OpenWorldBakery;
+	UOpenWorldBakeryDebugger* OpenWorldBakery;
 
 	UPROPERTY(EditDefaultsOnly, Category = "LandscapeGeneration")
 	TSubclassOf<AActor> OceanPlaneBP;
@@ -56,6 +56,10 @@ public:
 
 	FCriticalSection MeshGeneratorLock;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, Category = "LandscapeGeneration")
+		FDebugTextureParams DebugTextureParams;
+
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -65,9 +69,6 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
 	float ChunkSize = 5;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, Category = "LandscapeGeneration")
-	FDebugTextureParams DebugTextureParams;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, Category = "LandscapeGeneration")
 	TArray<FIntPoint> DebugVoxels;

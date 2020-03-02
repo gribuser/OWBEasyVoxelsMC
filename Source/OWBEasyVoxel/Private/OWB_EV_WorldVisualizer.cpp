@@ -10,7 +10,7 @@ UOWB_EV_WorldVisializer::UOWB_EV_WorldVisializer() {
 void UOWB_EV_WorldVisializer::BeginPlay()
 {
 	Super::BeginPlay();
-	OpenWorldBakery = NewObject<UOpenWorldBakery>();
+	OpenWorldBakery = NewObject<UOpenWorldBakeryDebugger>();
 	//GroundDensityBuilder = NewObject<UOWBDensityDataBuilder>(this, TEXT("GroundDensityBuilder"), RF_Standalone);
 	//WaterDensityBuilder = NewObject<UOWBDensityDataBuilder>(this, TEXT("WaterDensityBuilder"), RF_Standalone);
 
@@ -20,16 +20,17 @@ void UOWB_EV_WorldVisializer::TickComponent(float DeltaTime, ELevelTick TickType
 	int NumWorking = 0;
 	int NumPending = 0;
 	for (AOWB_EV_Chunk* Chunk : ChunksVisualizers) {
-		switch (Chunk->State){
-			case EOWBEVChunkStates::OWBEV_Pending: NumPending++; break;
-			case EOWBEVChunkStates::OWBEV_Working: NumWorking++; break;
-		}
+		if (Chunk != nullptr)
+			switch (Chunk->State){
+				case EOWBEVChunkStates::OWBEV_Pending: NumPending++; break;
+				case EOWBEVChunkStates::OWBEV_Working: NumWorking++; break;
+			}
 	}
 
 	int ThreadsToStart = FMath::Clamp(OpenWorldBakery->ThreadsToUse - NumWorking, 0, NumPending);
 	if (ThreadsToStart > 0) {
 		for (AOWB_EV_Chunk* Chunk : ChunksVisualizers) {
-			if (Chunk->State == EOWBEVChunkStates::OWBEV_Pending) {
+			if (Chunk != nullptr && Chunk->State == EOWBEVChunkStates::OWBEV_Pending) {
 				Chunk->InitTerrainBuild();
 				ThreadsToStart--;
 				NumPending--;
@@ -73,11 +74,12 @@ void UOWB_EV_WorldVisializer::CreateVisualization() {
 						NewChunk->BindToOpenWOrldBakery(OpenWorldBakery, x, y);
 						NewChunk->State = EOWBEVChunkStates::OWBEV_Pending;
 
+
+						if (Layer == Ground && DebugMaterialTemplate != nullptr && DebugBitmapForThis(x,y))
+							NewChunk->DebugMaterial = UMaterialInstanceDynamic::Create(DebugMaterialTemplate, this);
+						
 						if (TypedMaterials.Contains(Layer))
 							NewChunk->Material = UMaterialInstanceDynamic::Create(TypedMaterials[Layer], this);
-
-						if (DebugMaterialTemplate != nullptr && DebugBitmapForThis(x,y))
-							NewChunk->DebugMaterial = UMaterialInstanceDynamic::Create(DebugMaterialTemplate, this);
 
 						NewChunk->ChunkDescr = &CurChunksDescr;
 						ChunksVisualizers.Add(NewChunk);
@@ -135,11 +137,13 @@ void UOWB_EV_WorldVisializer::DrawChunkBox(FOWBMeshBlocks_set_contents& LayerChu
 void UOWB_EV_WorldVisializer::RemoveVisualization() {
 	// ...
 	for (AOWB_EV_Chunk* ChunkInWorld : ChunksVisualizers)
-		ChunkInWorld->Destroy();
+		if (ChunkInWorld != nullptr)
+			ChunkInWorld->Destroy();
 	ChunksVisualizers.Empty();
 
-	for (AActor* Actor : ChunksAdditionalActors) 
-		Actor->Destroy();
+	for (AActor* Actor : ChunksAdditionalActors)
+		if (Actor != nullptr)
+			Actor->Destroy();
 	ChunksAdditionalActors.Empty();
 }
 

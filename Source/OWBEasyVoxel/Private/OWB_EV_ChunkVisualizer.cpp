@@ -35,7 +35,7 @@ void AOWB_EV_Chunk::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AOWB_EV_Chunk::BindToOpenWOrldBakery(UOpenWorldBakery* OpenWorldBakery, int ChunkX, int ChunkY) {
+void AOWB_EV_Chunk::BindToOpenWOrldBakery(UOpenWorldBakeryDebugger* OpenWorldBakery, int ChunkX, int ChunkY) {
 	OWB = OpenWorldBakery;
 	if (ensureMsgf(OWB != nullptr, TEXT("Open world bakery not set, unsafe chunks setup - can not check - can not check validity")))
 		if (ensureMsgf(OWB->ChunksLayaut.XChunks > 0, TEXT("Open world bakery haven't executed CookChunks() yet, unsafe chunks setup - can not check validity")))
@@ -120,35 +120,52 @@ void AOWB_EV_Chunk::EndTerrainBuild(const FMeshData& AMeshData){
 	WorldVisualizer->MeshGeneratorLock.Lock();
 	ProceduralMesh->CreateMeshSection_LinearColor(0, AMeshData.Vertices, AMeshData.Triangles, AMeshData.Normals, AMeshData.UV0, AMeshData.Colors, AMeshData.Tangents, true);
 	WorldVisualizer->MeshGeneratorLock.Unlock();
-	//if (DebugMaterial != nullptr) {
 
-	//}
-	//else if (Material != nullptr) {
-		ProceduralMesh->SetMaterial(0, Material);
-		Material->SetScalarParameterValue(TEXT("GridScale"), 0.1f / MCSettings.Resolution);
-		FOWBMeshChunk& LayerChunk = ChunkDescr->ChunkContents[LayerToDraw];
+	FOWBMeshChunk& LayerChunk = ChunkDescr->ChunkContents[LayerToDraw];
+
+	UMaterialInstanceDynamic* ApplyedMaterial = nullptr;
+
+	if (DebugMaterial != nullptr) {
+		ApplyedMaterial = DebugMaterial;
+
+		int BlockWidth = LayerChunk.MaxPoint.X - LayerChunk.MinPoint.X + 2;
+		int BLockHeight = LayerChunk.MaxPoint.Y - LayerChunk.MinPoint.Y + 2;
+
+		float TextureScaleX = 1.0f / BlockWidth / MCSettings.Resolution;
+		float TextureScaleY = 1.0f / BLockHeight / MCSettings.Resolution;
+
+		DebugMaterial->SetVectorParameterValue(TEXT("TextureScale"), { TextureScaleX ,TextureScaleY, 1 });
+
+		ApplyedMaterial->SetVectorParameterValue(
+			TEXT("MapShift"),
+			{ (float)(0.4975 - 1.0 / BlockWidth), (float)(0.4975 - 1.0 / BLockHeight), 1 });
+
+		UCanvasRenderTarget2D* DebugTexture = OWB->CreateDebugTexture(
+			LayerChunk.MinPoint.X - 1,
+			LayerChunk.MinPoint.Y - 1,
+			LayerChunk.MaxPoint.X + 1,
+			LayerChunk.MaxPoint.Y + 1,
+			WorldVisualizer->DebugTextureParams
+		);
+
+		DebugMaterial->SetTextureParameterValue(
+			TEXT("ColorMap"),
+			DebugTexture
+		);
+	}
+	else if (Material != nullptr) {
+		ApplyedMaterial = Material;
+	}
+	if (ApplyedMaterial != nullptr) {
+		ProceduralMesh->SetMaterial(0, ApplyedMaterial);
+		ApplyedMaterial->SetScalarParameterValue(TEXT("GridScale"), 0.1f / MCSettings.Resolution);
 		float CenterX = (float)(LayerChunk.MinPoint.X + LayerChunk.MaxPoint.X) / 2 - 1;
-		float Grid5xPosX = (LayerChunk.MinPoint.X / 10) * 10 + 5;
 		float ShiftX = CenterX / 10;
-//		float ShiftX = (Grid5xPosX - CenterX) / MCSettings.Units.X;
 
 		float CenterY = (float)(LayerChunk.MinPoint.Y + LayerChunk.MaxPoint.Y) / 2 - 1;
-		float Grid5xPosY = (LayerChunk.MinPoint.Y / 10) * 10 + 5;
 		float ShiftY = CenterY / 10;
-//		float ShiftY = (Grid5xPosY - CenterY) / MCSettings.Units.Y;
-
-		//float ShiftX = (float)(LayerChunk.MinPoint.X % 10) / 10;
-		//float ShiftY = (float)(LayerChunk.MinPoint.Y % 10) / 10;
-//		float ShiftX = MCSettings.Units.X * MCSettings.Resolution / 2 - MCSettings.Resolution / 2;
-		//float ShiftY = MCSettings.Units.Y * MCSettings.Resolution / 2 - MCSettings.Resolution / 2;
-		Material->SetVectorParameterValue(TEXT("GridShift"), { ShiftX, ShiftY, 0});
-		//DynamicMaterial->SetScalarParameterValue(TEXT("TextureScale"), MapRescale);
-		//DynamicMaterial->SetScalarParameterValue(TEXT("GridScale"), (float)1 / MCSettings.Resolution / 10);
-		//DynamicMaterial->SetTextureParameterValue(
-		//	TEXT("ColorMap"),
-		//	DebugTexture
-		//);
-//	}
+		ApplyedMaterial->SetVectorParameterValue(TEXT("GridShift"), { ShiftX, ShiftY, 0});
+	}
 
 	State = EOWBEVChunkStates::OWBEV_Idle;
 }
