@@ -59,6 +59,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
 	UMaterialInstanceDynamic* Material;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
+	int ChunkX_ = -1;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
+	int ChunkY_ = -1;
 
 	FOWBMeshBlocks_set* ChunkDescr;
 
@@ -69,9 +73,6 @@ private:
 	UPROPERTY()
 	UOpenWorldBakeryDebugger* OWB = nullptr;
 
-	int ChunkX_ = -1;
-	int ChunkY_ = -1;
-
 	void EndTerrainBuild(const FMeshData& AMeshData);
 
 	TSharedPtr<FVoxelDataConverter, ESPMode::ThreadSafe> WorkerMesh = nullptr;
@@ -79,38 +80,4 @@ private:
 
 	FVoxelSettings MCSettings;
 	int CurLayer = 0;
-	
-
-
-	//
-//	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
-//	//URuntimeMeshComponent* StaticProvider = nullptr;
-//
-//	FIntVector Chunk;
-//	FVoxelSettings MCSettings;
-//	
-
-//	
-//	TSharedPtr<FVoxelDataConverter, ESPMode::ThreadSafe> WorkerMesh = nullptr;
-//	TSharedPtr<FMarchingCubes, ESPMode::ThreadSafe> WorkerCubes = nullptr;
-//	FCriticalSection* SharedMeshGenLock;
-//	FDebugTextureParams DebugTextureParams;
-//
-//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
-//	UMaterialInstanceDynamic* DynamicMaterial = nullptr;
-//
-//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
-//	UMaterialInstance* StaticMaterial = nullptr;
-//
-//	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
-//	bool CleanupMesh = false;
-//
-//	ATerrainVoxel* Next;
-//	int CutChunks;
-//
-
-//	void InitTerrainBuild();
-//	void RefreshDebugBitmap();
-//private:
-//	void EndTerrainBuild(const FMeshData& AMeshData);
 };

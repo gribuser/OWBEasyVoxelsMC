@@ -20,10 +20,10 @@ void UOWBDensityDataBuilder::SetLayer(EOWBMeshBlockTypes MapLayer) {
 	Layer = MapLayer;
 }
 
-FDensityPoint UOWBDensityDataBuilder::BuildDensityPoint_Implementation(const FIntVector& VoxelCoordinates, const FIntVector& ChunkSlot, const FVoxelSettings& Settings)
+void UOWBDensityDataBuilder::DoGetFDensityPoint(const FIntVector& VoxelCoordinates, FDensityPoint& DensityPoint)
 {
-	FDensityPoint ThisPointData(0, FLinearColor(0, 0, 0, 0));
-	if (ensureMsgf( OWB != nullptr,TEXT("Open world bakery not set, call BindToOpenWOrldBakery first"))
+	DensityPoint = FDensityPoint(0, FLinearColor(0, 0, 0, 0));
+	if (ensureMsgf(OWB != nullptr, TEXT("Open world bakery not set, call BindToOpenWOrldBakery first"))
 		&& ensureMsgf(OWB->MapWidth > 0, TEXT("Open world bakery has no world cooked (have you called CalcHillsLayaut() already?)"))) {
 		int Z = VoxelCoordinates.Z;
 		int X = VoxelCoordinates.X; // +ChunkSlot.X * Settings.ChunkRadius.X;
@@ -35,8 +35,9 @@ FDensityPoint UOWBDensityDataBuilder::BuildDensityPoint_Implementation(const FIn
 				X += ChunkDescrs.ChunkContents[Layer].MinPoint.X;
 				Y += ChunkDescrs.ChunkContents[Layer].MinPoint.Y;
 				Z += ChunkDescrs.ChunkContents[Layer].MinPoint.Z;
-			} else {
-				return ThisPointData;
+			}
+			else {
+				return;
 			}
 		}
 
@@ -46,7 +47,7 @@ FDensityPoint UOWBDensityDataBuilder::BuildDensityPoint_Implementation(const FIn
 		//		ChunkSlot.X, ChunkSlot.Y, ChunkSlot.Z,X,Y,Z);
 
 		if (X <= 0 || Y <= 0 || X >= OWB->MapWidth - 1 || Y >= OWB->MapHeight - 1) {
-			return ThisPointData;
+			return;
 		}
 
 		X--;
@@ -59,14 +60,37 @@ FDensityPoint UOWBDensityDataBuilder::BuildDensityPoint_Implementation(const FIn
 		if (Layer == EOWBMeshBlockTypes::Ground && ThisCellHeight <= OpenWorldBakery::OceanDeep) {
 			ThisCellHeight -= 0.001; // hack to supress blinking
 		}
-		#if !UE_BUILD_SHIPPING
+#if !UE_BUILD_SHIPPING
 		if (isnan(ThisCellHeight)) {
 			ThisCellHeight = 200000;
 		}
-		#endif
-//		float BtmLVL = OWB->CellWidth * Z;
-		ThisPointData.Value = ThisCellHeight - Z;
-
+#endif
+		//		float BtmLVL = OWB->CellWidth * Z;
+		DensityPoint.Value = ThisCellHeight - Z;
 	}
+}
+
+FDensityPoint UOWBDensityDataBuilder::BuildDensityPoint_Implementation(const FIntVector& VoxelCoordinates, const FIntVector& ChunkSlot, const FVoxelSettings& Settings)
+{
+	FDensityPoint ThisPointData;
+	DoGetFDensityPoint(VoxelCoordinates, ThisPointData);
 	return ThisPointData;
+}
+
+
+FOWB_MarchingCubes::FOWB_MarchingCubes(FVoxelSettings MCSettings, UOWBDensityDataBuilder* DataBuilder) :
+	FMarchingCubes({}, nullptr, MCSettings, { 0,0,0 }), MyDDBuider(DataBuilder){}
+
+void FOWB_MarchingCubes::BuildDensityPoint(const FIntVector& VoxelCoordinates, FDensityPoint& DensityPoint) const
+{
+	MyDDBuider->DoGetFDensityPoint(VoxelCoordinates, DensityPoint);
+}
+
+FOWB_VoxelDataConverter::FOWB_VoxelDataConverter(const TArray<FVector>& InCoordinates, const TArray<int32>& InTriangles, const TMap<FIntVector, FDensityPoint>& InDensityData, const FVoxelSettings& InSettings, UOWBDensityDataBuilder* DataBuilder) :
+	FVoxelDataConverter(InCoordinates, InTriangles, InDensityData, nullptr, InSettings, {0,0,0}, true, false),
+	MyDDBuider(DataBuilder){}
+
+void FOWB_VoxelDataConverter::BuildDensityPoint(const FIntVector& VoxelCoordinates, FDensityPoint& DensityPoint) const
+{
+	MyDDBuider->DoGetFDensityPoint(VoxelCoordinates, DensityPoint);
 }
