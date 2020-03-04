@@ -63,7 +63,7 @@ void AOWB_EV_Chunk::InitTerrainBuild()
 
 	MCSettings.Units = LayerChunk.MaxPoint - LayerChunk.MinPoint;
 
-	if (MCSettings.Units.X == 0 || MCSettings.Units.Y == 0 || MCSettings.Units.Z == 0) {
+	if (MCSettings.Units.X <= 0 || MCSettings.Units.Y <= 0 || MCSettings.Units.Z <= 0) {
 		State = EOWBEVChunkStates::OWBEV_Idle;
 		return;
 	}
