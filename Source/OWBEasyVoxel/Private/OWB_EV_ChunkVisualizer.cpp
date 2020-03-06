@@ -163,6 +163,10 @@ void AOWB_EV_Chunk::EndTerrainBuild(const FMeshData& AMeshData){
 		float CenterY = (float)(LayerChunk.MinPoint.Y + LayerChunk.MaxPoint.Y) / 2 - 1;
 		float ShiftY = CenterY / 10;
 		ApplyedMaterial->SetVectorParameterValue(TEXT("GridShift"), { ShiftX, ShiftY, 0});
+		ApplyedMaterial->SetScalarParameterValue(
+			TEXT("GlowLevel"),
+			WorldVisualizer->DebugTextureParams.DebugTerrainFill == Water ? 0.5 : 0
+		);
 	}
 
 	State = EOWBEVChunkStates::OWBEV_Idle;
