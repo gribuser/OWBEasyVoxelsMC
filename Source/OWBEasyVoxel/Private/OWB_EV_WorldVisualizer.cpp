@@ -4,7 +4,7 @@
 UOWB_EV_WorldVisializer::UOWB_EV_WorldVisializer() {
 	PrimaryComponentTick.bCanEverTick = true;
 	LayersToDraw.Add(Ground);
-	LayersToDraw.Add(Lake);
+	//LayersToDraw.Add(Lake);
 }
 
 void UOWB_EV_WorldVisializer::BeginPlay()
