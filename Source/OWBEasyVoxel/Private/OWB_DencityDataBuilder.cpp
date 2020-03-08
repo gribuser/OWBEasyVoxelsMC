@@ -56,7 +56,7 @@ void UOWBDensityDataBuilder::DoGetFDensityPoint(const FIntVector& VoxelCoordinat
 
 		OpenWorldBakery::FSquareMeter& Ground = OWB->Ground(X, Y);
 
-		double ThisCellHeight = Ground.TerrainHeightByType(Layer) / OWB->CellWidth;
+		OWBVoxFloat ThisCellHeight = Ground.TerrainHeightByType(Layer) / OWB->CellWidth;
 		if (Layer == EOWBMeshBlockTypes::Ground && ThisCellHeight <= OpenWorldBakery::OceanDeep) {
 			ThisCellHeight -= 0.001; // hack to supress blinking
 		}

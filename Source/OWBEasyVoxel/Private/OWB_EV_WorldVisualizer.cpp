@@ -4,13 +4,16 @@
 UOWB_EV_WorldVisializer::UOWB_EV_WorldVisializer() {
 	PrimaryComponentTick.bCanEverTick = true;
 	LayersToDraw.Add(Ground);
-	//LayersToDraw.Add(Lake);
+	LayersToDraw.Add(Lake);
+	//LayersToDraw.Add(River);
 }
 
 void UOWB_EV_WorldVisializer::BeginPlay()
 {
 	Super::BeginPlay();
 	OpenWorldBakery = NewObject<UOpenWorldBakeryDebugger>();
+	OpenWorldBakery->DebugTrapFrom = DebugTrapFrom;
+	OpenWorldBakery->DebugTrapTo = DebugTrapTo;
 	//GroundDensityBuilder = NewObject<UOWBDensityDataBuilder>(this, TEXT("GroundDensityBuilder"), RF_Standalone);
 	//WaterDensityBuilder = NewObject<UOWBDensityDataBuilder>(this, TEXT("WaterDensityBuilder"), RF_Standalone);
 

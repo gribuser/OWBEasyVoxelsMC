@@ -79,6 +79,12 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
 	TMap<TEnumAsByte<EOWBMeshBlockTypes>, UMaterialInterface*> TypedMaterials;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
+	FIntPoint DebugTrapFrom = { -1,-1 };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
+	FIntPoint DebugTrapTo = { -1,-1 };
+
 	UFUNCTION(BlueprintCallable, Category = "LandscapeGeneration")
 	void RemoveVisualization();
 
