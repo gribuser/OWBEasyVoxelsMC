@@ -71,16 +71,16 @@ void UOWBDensityDataBuilder::DoGetFDensityPoint(const FIntVector& VoxelCoordinat
 #endif
 		//		float BtmLVL = OWB->CellWidth * Z;
 		DensityPoint.Value = ThisCellHeight - Z;
-		FVector NormalAsColor = CookedGround.Normal;
-		NormalAsColor.Z = 0;
-		NormalAsColor.Normalize();
-		NormalAsColor.X = 0.03125 * (int)(32 * NormalAsColor.X);
-		NormalAsColor.Y = 0.03125 * (int)(32 * NormalAsColor.Y);
-		NormalAsColor = (NormalAsColor + FVector(1.0, 1.0, 1.0)) / 2;
-		DensityPoint.Color.R = NormalAsColor.X;
-		DensityPoint.Color.G = NormalAsColor.Y;
-		DensityPoint.Color.B = 0;// NormalAsColor.Z;
-		DensityPoint.Color.A = 1.0;
+
+		// Rivers need some extra info
+		if (Layer == 2) {
+			FVector2D NormalAsColor = (CookedGround.Stream + FVector2D(1.0, 1.0)) / 2;
+
+			DensityPoint.Color.R = NormalAsColor.X;
+			DensityPoint.Color.G = NormalAsColor.Y;
+			DensityPoint.Color.B = FMath::Clamp((CookedGround.RiverSurface - CookedGround.GroundSurface) / OWB->CellWidth / 2,0.0f,1.0f);
+			DensityPoint.Color.A = 1.0;
+		}
 	}
 }
 
