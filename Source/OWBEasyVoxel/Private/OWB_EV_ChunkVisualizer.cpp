@@ -137,6 +137,7 @@ void AOWB_EV_Chunk::EndTerrainBuild(const FMeshData& AMeshData){
 		ApplyedMaterial->SetVectorParameterValue(
 			TEXT("MapShift"),
 			{ (float)(0.5 - 1.0 / BlockWidth), (float)(0.5 - 1.0 / BLockHeight), 1 });
+//			{ (float)0.5, (float)0.5, 0 });
 
 		UCanvasRenderTarget2D* DebugTexture = OWB->CreateDebugTexture(
 			LayerChunk.MinPoint.X - 1,

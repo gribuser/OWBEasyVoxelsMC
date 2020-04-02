@@ -53,7 +53,11 @@ void UOWBDensityDataBuilder::DoGetFDensityPoint(const FIntVector& VoxelCoordinat
 		X--;
 		Y--;
 		Z--;
-
+#if !UE_BUILD_SHIPPING
+		if (X >= OWB->DebugTrapFrom.X && X <= OWB->DebugTrapTo.X && Y >= OWB->DebugTrapFrom.Y && Y <= OWB->DebugTrapTo.Y) {
+			UE_LOG(LogTemp, Log, TEXT("Debug trap %i:%i"), X, Y);
+		}
+#endif
 		const FOWBSquareMeter& CookedGround = OWB->CookedHeightMap[X + Y * OWB->MapWidth];
 
 		OWBVoxFloat ThisCellHeight = CookedGround.HeightByType(Layer) / OWB->CellWidth;
@@ -67,6 +71,16 @@ void UOWBDensityDataBuilder::DoGetFDensityPoint(const FIntVector& VoxelCoordinat
 #endif
 		//		float BtmLVL = OWB->CellWidth * Z;
 		DensityPoint.Value = ThisCellHeight - Z;
+		FVector NormalAsColor = CookedGround.Normal;
+		NormalAsColor.Z = 0;
+		NormalAsColor.Normalize();
+		NormalAsColor.X = 0.03125 * (int)(32 * NormalAsColor.X);
+		NormalAsColor.Y = 0.03125 * (int)(32 * NormalAsColor.Y);
+		NormalAsColor = (NormalAsColor + FVector(1.0, 1.0, 1.0)) / 2;
+		DensityPoint.Color.R = NormalAsColor.X;
+		DensityPoint.Color.G = NormalAsColor.Y;
+		DensityPoint.Color.B = 0;// NormalAsColor.Z;
+		DensityPoint.Color.A = 1.0;
 	}
 }
 
