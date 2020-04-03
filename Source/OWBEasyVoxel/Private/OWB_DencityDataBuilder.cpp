@@ -74,7 +74,10 @@ void UOWBDensityDataBuilder::DoGetFDensityPoint(const FIntVector& VoxelCoordinat
 
 		// Rivers need some extra info
 		if (Layer == 2) {
-			FVector2D NormalAsColor = (CookedGround.Stream + FVector2D(1.0, 1.0)) / 2;
+			FVector2D NormalAsColor = CookedGround.Stream;
+			//NormalAsColor.X = 0.1 * FMath::RoundToFloat(NormalAsColor.X * 10);
+			//NormalAsColor.Y = 0.1 * FMath::RoundToFloat(NormalAsColor.Y * 10);
+			NormalAsColor = (NormalAsColor + FVector2D(1.0, 1.0)) / 2;
 
 			DensityPoint.Color.R = NormalAsColor.X;
 			DensityPoint.Color.G = NormalAsColor.Y;
