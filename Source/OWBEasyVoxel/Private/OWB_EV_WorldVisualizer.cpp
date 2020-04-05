@@ -12,6 +12,8 @@ void UOWB_EV_WorldVisializer::BeginPlay()
 {
 	Super::BeginPlay();
 	OpenWorldBakery = NewObject<UOpenWorldBakeryDebugger>();
+	if (DebugTrapTo == FIntPoint(-1, -1))
+		DebugTrapTo = DebugTrapFrom;
 	OpenWorldBakery->DebugTrapFrom = DebugTrapFrom;
 	OpenWorldBakery->DebugTrapTo = DebugTrapTo;
 	//GroundDensityBuilder = NewObject<UOWBDensityDataBuilder>(this, TEXT("GroundDensityBuilder"), RF_Standalone);
