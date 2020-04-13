@@ -17,6 +17,7 @@ void UOWB_EV_WorldVisializer::BeginPlay()
 		DebugTrapTo = DebugTrapFrom;
 	OpenWorldBakery->DebugTrapFrom = DebugTrapFrom;
 	OpenWorldBakery->DebugTrapTo = DebugTrapTo;
+	OpenWorldBakery->WaterHeightScale = WaterHeightScale;
 	//GroundDensityBuilder = NewObject<UOWBDensityDataBuilder>(this, TEXT("GroundDensityBuilder"), RF_Standalone);
 	//WaterDensityBuilder = NewObject<UOWBDensityDataBuilder>(this, TEXT("WaterDensityBuilder"), RF_Standalone);
 

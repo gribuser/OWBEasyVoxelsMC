@@ -33,6 +33,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
 	float CoverNoiseStrength = 0.2;
 
+	// 0 - use default
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
+	float WaterHeightScale = 0;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
 	TArray<FOWBMapDisplacement> MapDisplacements;
 
