@@ -72,24 +72,14 @@ void UOWBDensityDataBuilder::DoGetFDensityPoint(const FIntVector& VoxelCoordinat
 		//		float BtmLVL = OWB->CellWidth * Z;
 		DensityPoint.Value = ThisCellHeight - Z;
 
-		// lake should have deepness
-		if (Layer == 1) {
-			float Deep = FMath::Clamp((float)sqrt((CookedGround.LakeSurface - CookedGround.GroundSurface) / OWB->CellWidth) / 3, 0.0f, 0.85f)+0.15;
-			//if (CookedGround.RiverSurface >= 0)
-			//	Deep = 0.03;
-			DensityPoint.Color.B = Deep;
-		} else if (Layer == 2) {
-			// Rivers need some extra info
+		if (Layer == EOWBMeshBlockTypes::FreshWater) {
+			// Water needs some extra info
 			FVector2D NormalAsColor = CookedGround.Stream;
 			//NormalAsColor.X = 0.1 * FMath::RoundToFloat(NormalAsColor.X * 10);
-			//NormalAsColor.Y = 0.1 * FMath::RoundToFloat(NormalAsColor.Y * 10);
+			NormalAsColor.Y *= -1;
 			NormalAsColor = (NormalAsColor + FVector2D(1.0, 1.0)) / 2;
 
-			float Deep = FMath::Clamp((float)sqrt((CookedGround.RiverSurface - CookedGround.GroundSurface) / OWB->CellWidth) / 2, 0.0f, 0.85f)+0.15;
-			if (CookedGround.LakeSurface >= 0) {
-				float HowDeep = 1 - FMath::Clamp((CookedGround.LakeSurface - CookedGround.GroundSurface) / OWB->CellWidth * 3, 0.0f, 0.9f);
-				Deep *= HowDeep;
-			}
+			float Deep = FMath::Clamp((float)sqrt((ThisCellHeight * OWB->CellWidth - CookedGround.GroundSurface) / OWB->CellWidth) / 10, 0.0f, 1.0f);
 
 			DensityPoint.Color.R = NormalAsColor.X;
 			DensityPoint.Color.G = NormalAsColor.Y;
