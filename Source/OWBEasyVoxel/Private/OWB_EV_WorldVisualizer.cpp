@@ -6,7 +6,7 @@ UOWB_EV_WorldVisializer::UOWB_EV_WorldVisializer() {
 	LayersToDraw.Add(Ground);
 //	LayersToDraw.Add(Lake);
 //	LayersToDraw.Add(River);
-	LayersToDraw.Add(FreshWater);
+//	LayersToDraw.Add(FreshWater);
 }
 
 void UOWB_EV_WorldVisializer::BeginPlay()
@@ -82,8 +82,10 @@ void UOWB_EV_WorldVisializer::CreateVisualization() {
 						NewChunk->State = EOWBEVChunkStates::OWBEV_Pending;
 
 
-						if (Layer == Ground && DebugMaterialTemplate != nullptr && DebugBitmapForThis(x,y))
+						if (Layer == Ground && DebugMaterialTemplate != nullptr) {
 							NewChunk->DebugMaterial = UMaterialInstanceDynamic::Create(DebugMaterialTemplate, this);
+							NewChunk->FullScaleDebugTexture = DebugBitmapForThis(x, y);
+						}
 						
 						if (TypedMaterials.Contains(Layer))
 							NewChunk->Material = UMaterialInstanceDynamic::Create(TypedMaterials[Layer], this);

@@ -65,6 +65,7 @@ public:
 	int ChunkY_ = -1;
 
 	FOWBMeshBlocks_set* ChunkDescr;
+	bool FullScaleDebugTexture = false;
 
 private:
 	UPROPERTY()
