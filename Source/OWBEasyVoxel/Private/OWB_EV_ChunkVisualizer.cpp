@@ -136,7 +136,7 @@ void AOWB_EV_Chunk::EndTerrainBuild(const FMeshData& AMeshData){
 
 		ApplyedMaterial->SetVectorParameterValue(
 			TEXT("MapShift"),
-			{ (float)(0.5 - 1.0 / BlockWidth), (float)(0.5 - 1.0 / BLockHeight), 1 });
+			{ (float)(0.5 - 0.5 / BlockWidth), (float)(0.5 - 0.5 / BLockHeight), 1 });
 //			{ (float)0.5, (float)0.5, 0 });
 		FDebugTextureParams ParamsForThis = WorldVisualizer->DebugTextureParams;
 		if (!FullScaleDebugTexture) {
@@ -164,10 +164,10 @@ void AOWB_EV_Chunk::EndTerrainBuild(const FMeshData& AMeshData){
 	if (ApplyedMaterial != nullptr) {
 		ProceduralMesh->SetMaterial(0, ApplyedMaterial);
 		ApplyedMaterial->SetScalarParameterValue(TEXT("GridScale"), 0.1f / MCSettings.Resolution);
-		float CenterX = (float)(LayerChunk.MinPoint.X + LayerChunk.MaxPoint.X) / 2 - 1;
+		float CenterX = (float)(LayerChunk.MinPoint.X + LayerChunk.MaxPoint.X) / 2 - 0.5;
 		float ShiftX = CenterX / 10;
 
-		float CenterY = (float)(LayerChunk.MinPoint.Y + LayerChunk.MaxPoint.Y) / 2 - 1;
+		float CenterY = (float)(LayerChunk.MinPoint.Y + LayerChunk.MaxPoint.Y) / 2 - 0.5;
 		float ShiftY = CenterY / 10;
 		ApplyedMaterial->SetVectorParameterValue(TEXT("GridShift"), { ShiftX, ShiftY, 0});
 		ApplyedMaterial->SetScalarParameterValue(
