@@ -6,7 +6,7 @@ UOWB_EV_WorldVisializer::UOWB_EV_WorldVisializer() {
 	LayersToDraw.Add(Ground);
 //	LayersToDraw.Add(Lake);
 //	LayersToDraw.Add(River);
-//	LayersToDraw.Add(FreshWater);
+	LayersToDraw.Add(FreshWater);
 }
 
 void UOWB_EV_WorldVisializer::BeginPlay()
