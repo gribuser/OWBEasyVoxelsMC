@@ -64,7 +64,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
 	int ChunkY_ = -1;
 
-	FOWBMeshBlocks_set* ChunkDescr;
+	const FOWBMeshBlocks_set* ChunkDescr;
 	bool FullScaleDebugTexture = false;
 
 private:

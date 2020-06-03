@@ -59,7 +59,7 @@ void AOWB_EV_Chunk::InitTerrainBuild()
 	State = EOWBEVChunkStates::OWBEV_Working;
 
 	DensityBuilder->SetLayer(LayerToDraw);
-	FOWBMeshChunk& LayerChunk = ChunkDescr->ChunkContents[LayerToDraw];
+	const FOWBMeshChunk& LayerChunk = ChunkDescr->ChunkContents[LayerToDraw];
 
 	MCSettings.Units = LayerChunk.MaxPoint - LayerChunk.MinPoint;
 
@@ -119,7 +119,7 @@ void AOWB_EV_Chunk::EndTerrainBuild(const FMeshData& AMeshData){
 	ProceduralMesh->CreateMeshSection_LinearColor(0, AMeshData.Vertices, AMeshData.Triangles, AMeshData.Normals, AMeshData.UV0, AMeshData.Colors, AMeshData.Tangents, true);
 	WorldVisualizer->MeshGeneratorLock.Unlock();
 
-	FOWBMeshChunk& LayerChunk = ChunkDescr->ChunkContents[LayerToDraw];
+	const FOWBMeshChunk& LayerChunk = ChunkDescr->ChunkContents[LayerToDraw];
 
 	UMaterialInstanceDynamic* ApplyedMaterial = nullptr;
 
@@ -172,7 +172,7 @@ void AOWB_EV_Chunk::EndTerrainBuild(const FMeshData& AMeshData){
 		ApplyedMaterial->SetVectorParameterValue(TEXT("GridShift"), { ShiftX, ShiftY, 0});
 		ApplyedMaterial->SetScalarParameterValue(
 			TEXT("GlowLevel"),
-			WorldVisualizer->DebugTextureParams.DebugTerrainFill == Water ? 0.5 : 0
+			WorldVisualizer->DebugTextureParams.DebugTerrainFill == EOWBDebugFillType::Water ? 0.5 : 0
 		);
 	}
 

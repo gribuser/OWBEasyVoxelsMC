@@ -3,6 +3,7 @@
 #include "MarchingCubes.h"
 #include "OWB_EV_ChunkVisualizer.h"
 #include "OpenWorldBakery.h"
+#include "RandomHeightMap.h"
 #include "utility/OpenWorldBakeryHeightmapDebugMapping.h"
 #include "Components/SceneComponent.h"
 #include "OWB_EV_WorldVisualizer.generated.h"
@@ -38,7 +39,7 @@ public:
 	float WaterHeightScale = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
-	TArray<FOWBMapDisplacement> MapDisplacements;
+	TArray<FOWBMapDistortion> MapDisplacements;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
 	TArray<FOWBRandHillSetup> RandomHills;
@@ -107,7 +108,7 @@ private:
 	TArray<EOWBMeshBlockTypes> LayersToDraw;
 
 	void PlaceOcean(int X, int Y, bool Water);
-	void DrawChunkBox(FOWBMeshBlocks_set_contents& LayerChunk);
+	void DrawChunkBox(const FOWBMeshBlocks_set_contents& LayerChunk);
 	bool DebugBitmapForThis(int x, int y);
 
 };

@@ -30,7 +30,7 @@ void UOWBDensityDataBuilder::DoGetFDensityPoint(const FIntVector& VoxelCoordinat
 		int Y = VoxelCoordinates.Y; // +ChunkSlot.Y * Settings.ChunkRadius.Y;
 
 		if (ChunkX_ >= 0) {
-			FOWBMeshBlocks_set& ChunkDescrs = OWB->Chunks[ChunkX_ + ChunkY_ * OWB->ChunksLayaut.XChunks];
+			const FOWBMeshBlocks_set& ChunkDescrs = OWB->Chunks[ChunkX_ + ChunkY_ * OWB->ChunksLayaut.XChunks];
 			if (ChunkDescrs.ChunkContents.Contains(Layer)) {
 				X += ChunkDescrs.ChunkContents[Layer].MinPoint.X;
 				Y += ChunkDescrs.ChunkContents[Layer].MinPoint.Y;
@@ -61,7 +61,7 @@ void UOWBDensityDataBuilder::DoGetFDensityPoint(const FIntVector& VoxelCoordinat
 		const FOWBSquareMeter& CookedGround = OWB->CookedHeightMap[X + Y * OWB->MapWidth];
 
 		OWBVoxFloat ThisCellHeight = CookedGround.HeightByType(Layer) / OWB->CellWidth;
-		if (Layer == EOWBMeshBlockTypes::Ground && ThisCellHeight <= OpenWorldBakery::OceanDeep) {
+		if (Layer == EOWBMeshBlockTypes::Ground && ThisCellHeight <= OWB->OceanDeep) {
 			ThisCellHeight -= 0.001; // hack to supress blinking
 		}
 #if !UE_BUILD_SHIPPING
@@ -76,10 +76,13 @@ void UOWBDensityDataBuilder::DoGetFDensityPoint(const FIntVector& VoxelCoordinat
 			// Water needs some extra info
 			FVector2D NormalAsColor = CookedGround.Stream;
 			//NormalAsColor.X = 0.1 * FMath::RoundToFloat(NormalAsColor.X * 10);
+			float Deep = 0;
+			if (CookedGround.GroundSurface < CookedGround.WaterSurface)
+				Deep = FMath::Clamp((float)sqrt((CookedGround.WaterSurface - CookedGround.GroundSurface) / OWB->CellWidth) / 5, 0.0f, 1.0f);
+			else
+				NormalAsColor /= 2;
 			NormalAsColor.Y *= -1;
 			NormalAsColor = (NormalAsColor + FVector2D(1.0, 1.0)) / 2;
-
-			float Deep = FMath::Clamp((float)sqrt((ThisCellHeight * OWB->CellWidth - CookedGround.GroundSurface) / OWB->CellWidth) / 10, 0.0f, 1.0f);
 
 			DensityPoint.Color.R = NormalAsColor.X;
 			DensityPoint.Color.G = NormalAsColor.Y;

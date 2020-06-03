@@ -3,10 +3,8 @@
 
 UOWB_EV_WorldVisializer::UOWB_EV_WorldVisializer() {
 	PrimaryComponentTick.bCanEverTick = true;
-	LayersToDraw.Add(Ground);
-//	LayersToDraw.Add(Lake);
-//	LayersToDraw.Add(River);
-	LayersToDraw.Add(FreshWater);
+	LayersToDraw.Add(EOWBMeshBlockTypes::Ground);
+	LayersToDraw.Add(EOWBMeshBlockTypes::FreshWater);
 }
 
 void UOWB_EV_WorldVisializer::BeginPlay()
@@ -17,7 +15,7 @@ void UOWB_EV_WorldVisializer::BeginPlay()
 		DebugTrapTo = DebugTrapFrom;
 	OpenWorldBakery->DebugTrapFrom = DebugTrapFrom;
 	OpenWorldBakery->DebugTrapTo = DebugTrapTo;
-	OpenWorldBakery->WaterHeightScale = WaterHeightScale;
+	OpenWorldBakery->WaterHeightScale_ = WaterHeightScale;
 	//GroundDensityBuilder = NewObject<UOWBDensityDataBuilder>(this, TEXT("GroundDensityBuilder"), RF_Standalone);
 	//WaterDensityBuilder = NewObject<UOWBDensityDataBuilder>(this, TEXT("WaterDensityBuilder"), RF_Standalone);
 
@@ -34,7 +32,7 @@ void UOWB_EV_WorldVisializer::TickComponent(float DeltaTime, ELevelTick TickType
 			}
 	}
 
-	int ThreadsToStart = FMath::Clamp(OpenWorldBakery->ThreadsToUse - NumWorking, 0, NumPending);
+	int ThreadsToStart = FMath::Clamp(OpenWorldBakery->MaxUsedThreads - NumWorking, 0, NumPending);
 	if (ThreadsToStart > 0) {
 		for (AOWB_EV_Chunk* Chunk : ChunksVisualizers) {
 			if (Chunk != nullptr && Chunk->State == EOWBEVChunkStates::OWBEV_Pending) {
@@ -52,7 +50,7 @@ void UOWB_EV_WorldVisializer::TickComponent(float DeltaTime, ELevelTick TickType
 
 void UOWB_EV_WorldVisializer::CreateVisualization() {
 	if (ensureMsgf(IsValid(OpenWorldBakery), TEXT("OpenWorldBakery object broken"))
-		&& ensureMsgf(OpenWorldBakery->bChunksReady, TEXT("Chunks were not setup properly, call SetupChunks() first"))) {
+		&& ensureMsgf(OpenWorldBakery->ChunksLayaut.XChunks > 0, TEXT("Chunks were not setup properly, call SetupChunks() first"))) {
 		if (ChunksVisualizers.Num() > 0) {
 			RemoveVisualization();
 		}
@@ -60,10 +58,10 @@ void UOWB_EV_WorldVisializer::CreateVisualization() {
 //		FVector MyLocation = GetComponentLocation();
 		for (int x = 0; x < OpenWorldBakery->ChunksLayaut.XChunks; x++) {
 			for (int y = 0; y < OpenWorldBakery->ChunksLayaut.YChunks; y++) {
-				FOWBMeshBlocks_set& CurChunksDescr = OpenWorldBakery->Chunks[y * OpenWorldBakery->ChunksLayaut.XChunks + x];
+				const FOWBMeshBlocks_set& CurChunksDescr = OpenWorldBakery->Chunks[y * OpenWorldBakery->ChunksLayaut.XChunks + x];
 				for (EOWBMeshBlockTypes& Layer : LayersToDraw) {
 					if (CurChunksDescr.ChunkContents.Contains(Layer)) {
-						FOWBMeshBlocks_set_contents& LayerChunk = CurChunksDescr.ChunkContents[Layer];
+						const FOWBMeshBlocks_set_contents& LayerChunk = CurChunksDescr.ChunkContents[Layer];
 						DrawChunkBox(LayerChunk);
 						AOWB_EV_Chunk* NewChunk = GetWorld()->SpawnActor<AOWB_EV_Chunk>();
 						NewChunk->WorldVisualizer = this;
@@ -82,7 +80,7 @@ void UOWB_EV_WorldVisializer::CreateVisualization() {
 						NewChunk->State = EOWBEVChunkStates::OWBEV_Pending;
 
 
-						if (Layer == Ground && DebugMaterialTemplate != nullptr) {
+						if (Layer == EOWBMeshBlockTypes::Ground && DebugMaterialTemplate != nullptr) {
 							NewChunk->DebugMaterial = UMaterialInstanceDynamic::Create(DebugMaterialTemplate, this);
 							NewChunk->FullScaleDebugTexture = DebugBitmapForThis(x, y);
 						}
@@ -93,7 +91,7 @@ void UOWB_EV_WorldVisializer::CreateVisualization() {
 						NewChunk->ChunkDescr = &CurChunksDescr;
 						ChunksVisualizers.Add(NewChunk);
 
-						if (Layer == Ground && LayerChunk.MinPoint.Z == (int)(OpenWorldBakery::OceanDeep /OpenWorldBakery->CellWidth - 1)) {
+						if (Layer == EOWBMeshBlockTypes::Ground && LayerChunk.MinPoint.Z == (int)(OpenWorldBakery->OceanDeep /OpenWorldBakery->CellWidth - 1)) {
 							PlaceOcean(x, y, false);
 						}
 					}
@@ -119,9 +117,9 @@ bool UOWB_EV_WorldVisializer::DebugBitmapForThis(int x, int y) {
 	return false;
 }
 
-void UOWB_EV_WorldVisializer::DrawChunkBox(FOWBMeshBlocks_set_contents& LayerChunk) {
+void UOWB_EV_WorldVisializer::DrawChunkBox(const FOWBMeshBlocks_set_contents& LayerChunk) {
 	if (ChunkVisualBP != nullptr) {
-		for (FOWBMeshChunk& Microchunk : LayerChunk.TypedBlocks) {
+		for (const FOWBMeshChunk& Microchunk : LayerChunk.TypedBlocks) {
 			FIntVector ChunkMetrics = Microchunk.MaxPoint - Microchunk.MinPoint;
 
 			FVector ScaleVect(ChunkMetrics.X, ChunkMetrics.Y, ChunkMetrics.Z);
@@ -172,7 +170,7 @@ void UOWB_EV_WorldVisializer::PlaceOcean(int X, int Y, bool Water) {
 		APlaneActor->SetActorRelativeLocation({
 			SeaPlaneSize / 2 * Scale + OpenWorldBakery->ChunksLayaut.ChunkWidth * VoxelSize * X,
 			SeaPlaneSize / 2 * Scale + OpenWorldBakery->ChunksLayaut.ChunkHeight * VoxelSize * Y,
-			Water ? 0 : (float)(OpenWorldBakery::OceanDeep / OpenWorldBakery->CellWidth * VoxelSize) });
+			Water ? 0 : (float)(OpenWorldBakery->OceanDeep / OpenWorldBakery->CellWidth * VoxelSize) });
 		ChunksAdditionalActors.Add(APlaneActor);
 	}
 }
