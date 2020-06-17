@@ -58,7 +58,7 @@ void UOWBDensityDataBuilder::DoGetFDensityPoint(const FIntVector& VoxelCoordinat
 			UE_LOG(LogTemp, Log, TEXT("Debug trap %i:%i"), X, Y);
 		}
 #endif
-		const FOWBSquareMeter& CookedGround = OWB->CookedHeightMap[X + Y * OWB->MapWidth];
+		const FOWBSquareMeter& CookedGround = OWB->BakedHeightMap[X + Y * OWB->MapWidth];
 
 		OWBVoxFloat ThisCellHeight = CookedGround.HeightByType(Layer) / OWB->CellWidth;
 		if (Layer == EOWBMeshBlockTypes::Ground && ThisCellHeight <= OWB->OceanDeep) {
