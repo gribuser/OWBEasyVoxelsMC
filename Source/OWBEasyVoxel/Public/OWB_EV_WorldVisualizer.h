@@ -25,8 +25,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration", meta = (ClampMin = "0.1"))
 	float VoxelSize = 5;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration", meta = (ClampMin = "1"))
-	int CutChunks = 2;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration", meta = (ClampMin = "1"))
+	//int CutChunks = 2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
 	float CoverNoiseScale = 0.2;
@@ -45,7 +45,7 @@ public:
 	TArray<FOWBRandHillSetup> RandomHills;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
-	int TerrainSeed = 2;
+	int TerrainSeed = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
 	UOpenWorldBakeryDebugger* OpenWorldBakery;
