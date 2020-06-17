@@ -23,7 +23,7 @@
 class UOWB_EV_WorldVisializer;
 
 UENUM(BlueprintType, Category = "Open World Bakery|Enums")
-enum EOWBEVChunkStates { OWBEV_Idle, OWBEV_Pending, OWBEV_Working };
+enum class EOWBEVChunkStates: uint8 { OWBEV_Idle, OWBEV_Pending, OWBEV_Working };
 
 UCLASS()
 class OWBEASYVOXEL_API AOWB_EV_Chunk : public AActor //ARuntimeMeshActor
@@ -45,13 +45,13 @@ public:
 	void InitTerrainBuild();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
-	TEnumAsByte<EOWBEVChunkStates> State = EOWBEVChunkStates::OWBEV_Idle;
+	EOWBEVChunkStates State = EOWBEVChunkStates::OWBEV_Idle;
 
 	virtual void Tick(float DeltaTime) override;
 	UOWB_EV_WorldVisializer* WorldVisualizer;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
-	TEnumAsByte<EOWBMeshBlockTypes> LayerToDraw;
+	EOWBMeshBlockTypes LayerToDraw;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
 	UMaterialInstanceDynamic* DebugMaterial;

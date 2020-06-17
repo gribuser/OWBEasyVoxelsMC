@@ -82,7 +82,7 @@ protected:
 	UMaterialInterface* DebugMaterialTemplate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
-	TMap<TEnumAsByte<EOWBMeshBlockTypes>, UMaterialInterface*> TypedMaterials;
+	TMap<EOWBMeshBlockTypes, UMaterialInterface*> TypedMaterials;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
 	FIntPoint DebugTrapFrom = { -1,-1 };
