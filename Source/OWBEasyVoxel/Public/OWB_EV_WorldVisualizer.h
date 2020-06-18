@@ -62,7 +62,7 @@ public:
 	FCriticalSection MeshGeneratorLock;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, Category = "LandscapeGeneration")
-		FDebugTextureParams DebugTextureParams;
+	FDebugTextureParams DebugTextureParams;
 
 
 protected:
@@ -76,7 +76,7 @@ protected:
 	float ChunkSize = 5;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, Category = "LandscapeGeneration")
-	TArray<FIntPoint> DebugVoxels;
+	TArray<FIntPoint> DebugVoxels = { {-1,-1} };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
 	UMaterialInterface* DebugMaterialTemplate;

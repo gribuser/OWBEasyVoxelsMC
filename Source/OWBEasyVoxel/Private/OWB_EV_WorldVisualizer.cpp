@@ -91,7 +91,7 @@ void UOWB_EV_WorldVisializer::CreateVisualization() {
 						NewChunk->ChunkDescr = &CurChunksDescr;
 						ChunksVisualizers.Add(NewChunk);
 
-						if (Layer == EOWBMeshBlockTypes::Ground && LayerChunk.MinPoint.Z == (int)(OpenWorldBakery->OceanDeep /OpenWorldBakery->CellWidth - 1)) {
+						if (Layer == EOWBMeshBlockTypes::Ground && LayerChunk.MinPoint.Z <= (int)(OpenWorldBakery->OceanDeep /OpenWorldBakery->CellWidth)) {
 							PlaceOcean(x, y, false);
 						}
 					}
