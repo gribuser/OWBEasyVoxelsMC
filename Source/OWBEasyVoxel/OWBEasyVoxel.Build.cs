@@ -1,25 +1,17 @@
 // Some copyright should be here...
 
 using UnrealBuildTool;
+using System.IO;
 
 public class OWBEasyVoxel : ModuleRules
 {
 	public OWBEasyVoxel(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
-		
-		PublicIncludePaths.AddRange(
-			new string[] {
-				// ... add public include paths required here ...
-			}
-			);
-				
-		
-		PrivateIncludePaths.AddRange(
-			new string[] {
-				// ... add other private include paths required here ...
-			}
-			);
+
+		PublicIncludePaths.Add(Path.Combine(ModuleDirectory, "Public"));
+
+		PrivateIncludePaths.Add(Path.Combine(ModuleDirectory, "Private"));
 			
 		
 		PublicDependencyModuleNames.AddRange(
@@ -28,6 +20,7 @@ public class OWBEasyVoxel : ModuleRules
 				"Core",
 				"EasyVoxelsMC",
 				"OpenWorldBakery",
+				"OpenWorldBakeryEditor",
 				"ProceduralMeshComponent"
 				// ... add other public dependencies that you statically link with here ...
 			}

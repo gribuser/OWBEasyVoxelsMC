@@ -9,8 +9,3 @@ UOWBEasyVoxelBPLibrary::UOWBEasyVoxelBPLibrary(const FObjectInitializer& ObjectI
 
 }
 
-float UOWBEasyVoxelBPLibrary::OWBEasyVoxelSampleFunction(float Param)
-{
-	return -1;
-}
-

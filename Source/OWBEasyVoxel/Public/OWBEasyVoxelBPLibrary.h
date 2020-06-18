@@ -28,6 +28,4 @@ class OWBEASYVOXEL_API UOWBEasyVoxelBPLibrary : public UBlueprintFunctionLibrary
 {
 	GENERATED_UCLASS_BODY()
 
-	UFUNCTION(BlueprintCallable, meta = (DisplayName = "Execute Sample function", Keywords = "OWBEasyVoxel sample test testing"), Category = "OWBEasyVoxelTesting")
-	static float OWBEasyVoxelSampleFunction(float Param);
 };
