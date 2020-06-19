@@ -74,6 +74,7 @@ void UOWB_EV_WorldVisializer::CreateVisualization() {
 						MeshLocation.X *= LayerChunk.MinPoint.X - 1 + 0.5 * ChunkMetrics.X;
 						MeshLocation.Y *= LayerChunk.MinPoint.Y - 1 + 0.5 * ChunkMetrics.Y;
 						MeshLocation.Z *= LayerChunk.MinPoint.Z - 1 + 0.5 * ChunkMetrics.Z;
+						MeshLocation += LandscapeShift;
 
 						NewChunk->SetActorRelativeLocation(MeshLocation, false, nullptr, {});
 						NewChunk->BindToOpenWOrldBakery(OpenWorldBakery, x, y);
@@ -91,7 +92,7 @@ void UOWB_EV_WorldVisializer::CreateVisualization() {
 						NewChunk->ChunkDescr = &CurChunksDescr;
 						ChunksVisualizers.Add(NewChunk);
 
-						if (Layer == EOWBMeshBlockTypes::Ground && LayerChunk.MinPoint.Z <= (int)(OpenWorldBakery->OceanDeep /OpenWorldBakery->CellWidth)) {
+						if (Layer == EOWBMeshBlockTypes::Ground && LayerChunk.MinPoint.Z <= (int)(OpenWorldBakery->OceanDeep /OpenWorldBakery->CellWidth+1)) {
 							PlaceOcean(x, y, false);
 						}
 					}
@@ -134,6 +135,7 @@ void UOWB_EV_WorldVisializer::DrawChunkBox(const FOWBMeshBlocks_set_contents& La
 			MeshLocation.X *= Microchunk.MinPoint.X + ChunkMetrics.X / 2;
 			MeshLocation.Y *= Microchunk.MinPoint.Y + ChunkMetrics.Y / 2;
 			MeshLocation.Z *= Microchunk.MinPoint.Z + ChunkMetrics.Z / 2;
+			MeshLocation += LandscapeShift;
 
 			NewChunkBox->SetActorRelativeLocation(MeshLocation, false, nullptr, {});
 			ChunksAdditionalActors.Add(NewChunkBox);
@@ -167,10 +169,11 @@ void UOWB_EV_WorldVisializer::PlaceOcean(int X, int Y, bool Water) {
 	if (ensureMsgf(ActorToSpawn != nullptr, TEXT("Ocean plane template not defined, see world generator props"))) {
 		AActor* APlaneActor = GetWorld()->SpawnActor<AActor>(ActorToSpawn, MyTransform);
 		APlaneActor->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
-		APlaneActor->SetActorRelativeLocation({
-			SeaPlaneSize / 2 * Scale + OpenWorldBakery->ChunksLayaut.ChunkWidth * VoxelSize * X,
+		FVector BoxLocation(SeaPlaneSize / 2 * Scale + OpenWorldBakery->ChunksLayaut.ChunkWidth * VoxelSize * X,
 			SeaPlaneSize / 2 * Scale + OpenWorldBakery->ChunksLayaut.ChunkHeight * VoxelSize * Y,
-			Water ? 0 : (float)(OpenWorldBakery->OceanDeep / OpenWorldBakery->CellWidth * VoxelSize) });
+			Water ? 0 : (float)(OpenWorldBakery->OceanDeep / OpenWorldBakery->CellWidth * VoxelSize));
+		BoxLocation += LandscapeShift;
+		APlaneActor->SetActorRelativeLocation(BoxLocation);
 		ChunksAdditionalActors.Add(APlaneActor);
 	}
 }

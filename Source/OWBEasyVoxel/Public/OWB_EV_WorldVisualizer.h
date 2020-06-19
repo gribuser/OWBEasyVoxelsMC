@@ -59,6 +59,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "LandscapeGeneration")
 	TSubclassOf<AActor> ChunkVisualBP;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
+	FVector LandscapeShift;
+
 	FCriticalSection MeshGeneratorLock;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, Category = "LandscapeGeneration")
