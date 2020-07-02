@@ -25,18 +25,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration", meta = (ClampMin = "0.1"))
 	float VoxelSize = 5;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration", meta = (ClampMin = "1"))
-	//int CutChunks = 2;
-
+	// 1 - use default
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
-	float CoverNoiseScale = 0.2;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
-	float CoverNoiseStrength = 0.2;
-
-	// 0 - use default
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
-	float WaterHeightScale = 0;
+	float RainIntensity = 1.0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
 	TArray<FOWBMapDistortion> MapDisplacements;
