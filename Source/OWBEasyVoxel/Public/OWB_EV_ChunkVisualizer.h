@@ -1,4 +1,4 @@
-// Open World Baker
+// Open World Bakery
 // Copyright 2019 Dmitry Grivov, grib@gribuser.ru, all rights reserved.
 
 

@@ -1,16 +1,11 @@
-// Open World Baker
+// Open World Bakery
 // Copyright 2019 Dmitry Grivov, grib@gribuser.ru, all rights reserved.
 
 
 #include "OWB_EV_ChunkVisualizer.h"
 #include "OWB_EV_WorldVisualizer.h"
 #include "Materials/MaterialInstanceDynamic.h"
-//#include "Components/StaticMeshComponent.h"
-//#include "VoxelLib/VoxelDataConverter.h"
-//#include "RuntimeMeshActor.h"
-//#include "RuntimeMeshCore.h"
-//#include "Providers/RuntimeMeshProviderStatic.h"
-//#include "Providers/RuntimeMeshProviderStaticMesh.h"
+
 
 AOWB_EV_Chunk::AOWB_EV_Chunk()
 {
