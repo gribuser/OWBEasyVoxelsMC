@@ -3,7 +3,7 @@
 #include "MarchingCubes.h"
 #include "OWB_EV_ChunkVisualizer.h"
 #include "OpenWorldBakery.h"
-#include "RandomHeightMap.h"
+#include "Enchanters/RandomHeightMap.h"
 #include "HeightmapDebugMapping.h"
 #include "Components/SceneComponent.h"
 #include "OWB_EV_WorldVisualizer.generated.h"

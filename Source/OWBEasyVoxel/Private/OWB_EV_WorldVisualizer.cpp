@@ -15,10 +15,6 @@ void UOWB_EV_WorldVisializer::BeginPlay()
 		DebugTrapTo = DebugTrapFrom;
 	OpenWorldBakery->DebugTrapFrom = DebugTrapFrom;
 	OpenWorldBakery->DebugTrapTo = DebugTrapTo;
-	OpenWorldBakery->RainIntensity = RainIntensity;
-	//GroundDensityBuilder = NewObject<UOWBDensityDataBuilder>(this, TEXT("GroundDensityBuilder"), RF_Standalone);
-	//WaterDensityBuilder = NewObject<UOWBDensityDataBuilder>(this, TEXT("WaterDensityBuilder"), RF_Standalone);
-
 }
 
 void UOWB_EV_WorldVisializer::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
