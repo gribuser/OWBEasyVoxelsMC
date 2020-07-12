@@ -17,6 +17,12 @@ void UOWB_EV_WorldVisializer::BeginPlay()
 	OpenWorldBakery->DebugTrapTo = DebugTrapTo;
 }
 
+void UOWB_EV_WorldVisializer::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+	Super::EndPlay(EndPlayReason);
+	OpenWorldBakery->TerminateAllWorkers();
+}
+
+
 void UOWB_EV_WorldVisializer::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) {
 	int NumWorking = 0;
 	int NumPending = 0;
@@ -45,62 +51,63 @@ void UOWB_EV_WorldVisializer::TickComponent(float DeltaTime, ELevelTick TickType
 }
 
 void UOWB_EV_WorldVisializer::CreateVisualization() {
-	if (ensureMsgf(IsValid(OpenWorldBakery), TEXT("OpenWorldBakery object broken"))
-		&& ensureMsgf(OpenWorldBakery->ChunksLayaut.XChunks > 0, TEXT("Chunks were not setup properly, call SetupChunks() first"))) {
-		if (ChunksVisualizers.Num() > 0) {
-			RemoveVisualization();
-		}
+	if (!ensureMsgf(IsValid(OpenWorldBakery), TEXT("OpenWorldBakery object broken"))
+		|| !ensureMsgf(OpenWorldBakery->ChunksLayaut.XChunks > 0, TEXT("Chunks were not setup properly, call SetupChunks() first"))
+		|| !ensureMsgf(OpenWorldBakery->Chunks.Num() == OpenWorldBakery->ChunksLayaut.XChunks * OpenWorldBakery->ChunksLayaut.YChunks, TEXT("Chunks were not baked properly, call BakeHeightmap() first"))
+		)
+		return;
+	if (ChunksVisualizers.Num() > 0) {
+		RemoveVisualization();
+	}
 //		FTransform MyTransform = GetComponentTransform();
 //		FVector MyLocation = GetComponentLocation();
-		for (int x = 0; x < OpenWorldBakery->ChunksLayaut.XChunks; x++) {
-			for (int y = 0; y < OpenWorldBakery->ChunksLayaut.YChunks; y++) {
-				const FOWBMeshBlocks_set& CurChunksDescr = OpenWorldBakery->Chunks[y * OpenWorldBakery->ChunksLayaut.XChunks + x];
-				for (EOWBMeshBlockTypes& Layer : LayersToDraw) {
-					if (CurChunksDescr.ChunkContents.Contains(Layer)) {
-						const FOWBMeshBlocks_set_contents& LayerChunk = CurChunksDescr.ChunkContents[Layer];
-						DrawChunkBox(LayerChunk);
-						AOWB_EV_Chunk* NewChunk = GetWorld()->SpawnActor<AOWB_EV_Chunk>();
-						NewChunk->WorldVisualizer = this;
-						NewChunk->LayerToDraw = Layer;
-						NewChunk->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
+	for (int x = 0; x < OpenWorldBakery->ChunksLayaut.XChunks; x++) {
+		for (int y = 0; y < OpenWorldBakery->ChunksLayaut.YChunks; y++) {
+			const FOWBMeshBlocks_set& CurChunksDescr = OpenWorldBakery->Chunks[y * OpenWorldBakery->ChunksLayaut.XChunks + x];
+			for (EOWBMeshBlockTypes& Layer : LayersToDraw) {
+				if (CurChunksDescr.ChunkContents.Contains(Layer)) {
+					const FOWBMeshBlocks_set_contents& LayerChunk = CurChunksDescr.ChunkContents[Layer];
+					DrawChunkBox(LayerChunk);
+					AOWB_EV_Chunk* NewChunk = GetWorld()->SpawnActor<AOWB_EV_Chunk>();
+					NewChunk->WorldVisualizer = this;
+					NewChunk->LayerToDraw = Layer;
+					NewChunk->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
 
-						FIntVector ChunkMetrics = LayerChunk.MaxPoint - LayerChunk.MinPoint;
+					FIntVector ChunkMetrics = LayerChunk.MaxPoint - LayerChunk.MinPoint;
 
-						FVector MeshLocation = { VoxelSize, VoxelSize, VoxelSize };
-						MeshLocation.X *= LayerChunk.MinPoint.X - 1 + 0.5 * ChunkMetrics.X;
-						MeshLocation.Y *= LayerChunk.MinPoint.Y - 1 + 0.5 * ChunkMetrics.Y;
-						MeshLocation.Z *= LayerChunk.MinPoint.Z - 1 + 0.5 * ChunkMetrics.Z;
-						MeshLocation += LandscapeShift;
+					FVector MeshLocation = { VoxelSize, VoxelSize, VoxelSize };
+					MeshLocation.X *= LayerChunk.MinPoint.X - 1 + 0.5 * ChunkMetrics.X;
+					MeshLocation.Y *= LayerChunk.MinPoint.Y - 1 + 0.5 * ChunkMetrics.Y;
+					MeshLocation.Z *= LayerChunk.MinPoint.Z - 1 + 0.5 * ChunkMetrics.Z;
+					MeshLocation += LandscapeShift;
 
-						NewChunk->SetActorRelativeLocation(MeshLocation, false, nullptr, {});
-						NewChunk->BindToOpenWOrldBakery(OpenWorldBakery, x, y);
-						NewChunk->State = EOWBEVChunkStates::OWBEV_Pending;
+					NewChunk->SetActorRelativeLocation(MeshLocation, false, nullptr, {});
+					NewChunk->BindToOpenWOrldBakery(OpenWorldBakery, x, y);
+					NewChunk->State = EOWBEVChunkStates::OWBEV_Pending;
 
 
-						if (Layer == EOWBMeshBlockTypes::Ground && DebugMaterialTemplate != nullptr) {
-							NewChunk->DebugMaterial = UMaterialInstanceDynamic::Create(DebugMaterialTemplate, this);
-							NewChunk->FullScaleDebugTexture = DebugBitmapForThis(x, y);
-						}
+					if (Layer == EOWBMeshBlockTypes::Ground && DebugMaterialTemplate != nullptr) {
+						NewChunk->DebugMaterial = UMaterialInstanceDynamic::Create(DebugMaterialTemplate, this);
+						NewChunk->FullScaleDebugTexture = DebugBitmapForThis(x, y);
+					}
 						
-						if (TypedMaterials.Contains(Layer))
-							NewChunk->Material = UMaterialInstanceDynamic::Create(TypedMaterials[Layer], this);
+					if (TypedMaterials.Contains(Layer))
+						NewChunk->Material = UMaterialInstanceDynamic::Create(TypedMaterials[Layer], this);
 
-						NewChunk->ChunkDescr = &CurChunksDescr;
-						ChunksVisualizers.Add(NewChunk);
+					NewChunk->ChunkDescr = &CurChunksDescr;
+					ChunksVisualizers.Add(NewChunk);
 
-						if (Layer == EOWBMeshBlockTypes::Ground && LayerChunk.MinPoint.Z <= (int)(OpenWorldBakery->OceanDeep /OpenWorldBakery->CellWidth+1)) {
-							PlaceOcean(x, y, false);
-						}
+					if (Layer == EOWBMeshBlockTypes::Ground && LayerChunk.MinPoint.Z <= (int)(OpenWorldBakery->OceanDeep /OpenWorldBakery->CellWidth+1)) {
+						PlaceOcean(x, y, false);
 					}
 				}
-				if (CurChunksDescr.ChunkContents.Contains(EOWBMeshBlockTypes::Ocean))
-					PlaceOcean(x, y, true);
-
-				if (!CurChunksDescr.ChunkContents.Contains(EOWBMeshBlockTypes::Ground))
-					PlaceOcean(x, y, false);
 			}
+			if (CurChunksDescr.ChunkContents.Contains(EOWBMeshBlockTypes::Ocean))
+				PlaceOcean(x, y, true);
+
+			if (!CurChunksDescr.ChunkContents.Contains(EOWBMeshBlockTypes::Ground))
+				PlaceOcean(x, y, false);
 		}
-//		PrimaryComponentTick.bCanEverTick = true;
 	}
 }
 
