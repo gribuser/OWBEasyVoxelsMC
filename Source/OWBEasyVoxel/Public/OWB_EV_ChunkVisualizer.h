@@ -38,7 +38,7 @@ public:
 	UProceduralMeshComponent* ProceduralMesh;
 
 	UFUNCTION(BlueprintCallable, Category = "OpenWorldBakery")
-	void BindToOpenWOrldBakery(UOpenWorldBakeryDebugger* OpenWorldBakery, int ChunkX, int ChunkY);
+	void BindToOpenWOrldBakery(UOpenWorldBakeryTextured* OpenWorldBakery, int ChunkX, int ChunkY);
 
 
 	UFUNCTION(BlueprintCallable, Category = "OpenWorldBakery")
@@ -72,7 +72,7 @@ private:
 	UOWBDensityDataBuilder* DensityBuilder = nullptr;
 
 	UPROPERTY()
-	UOpenWorldBakeryDebugger* OWB = nullptr;
+	UOpenWorldBakeryTextured* OWB = nullptr;
 
 	void EndTerrainBuild(const FMeshData& AMeshData);
 

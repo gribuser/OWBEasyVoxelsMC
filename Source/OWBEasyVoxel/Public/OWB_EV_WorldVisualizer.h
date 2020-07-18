@@ -4,7 +4,7 @@
 #include "OWB_EV_ChunkVisualizer.h"
 #include "OpenWorldBakery.h"
 #include "Enchanters/RandomHeightMap.h"
-#include "HeightmapDebugMapping.h"
+#include "TexturedBakery.h"
 #include "Components/SceneComponent.h"
 #include "OWB_EV_WorldVisualizer.generated.h"
 
@@ -39,7 +39,7 @@ public:
 	int TerrainSeed = 0;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
-	UOpenWorldBakeryDebugger* OpenWorldBakery;
+	UOpenWorldBakeryTextured* OpenWorldBakery;
 
 	UPROPERTY(EditDefaultsOnly, Category = "LandscapeGeneration")
 	TSubclassOf<AActor> OceanPlaneBP;

@@ -30,7 +30,7 @@ void AOWB_EV_Chunk::BeginPlay()
 	Super::BeginPlay();
 }
 
-void AOWB_EV_Chunk::BindToOpenWOrldBakery(UOpenWorldBakeryDebugger* OpenWorldBakery, int ChunkX, int ChunkY) {
+void AOWB_EV_Chunk::BindToOpenWOrldBakery(UOpenWorldBakeryTextured* OpenWorldBakery, int ChunkX, int ChunkY) {
 	OWB = OpenWorldBakery;
 	if (ensureMsgf(OWB != nullptr, TEXT("Open world bakery not set, unsafe chunks setup - can not check - can not check validity")))
 		if (ensureMsgf(OWB->ChunksLayaut.XChunks > 0, TEXT("Open world bakery haven't executed CookChunks() yet, unsafe chunks setup - can not check validity")))
