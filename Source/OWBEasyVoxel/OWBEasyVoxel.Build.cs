@@ -20,7 +20,6 @@ public class OWBEasyVoxel : ModuleRules
 				"Core",
 				"EasyVoxelsMC",
 				"OpenWorldBakery",
-				"OpenWorldBakeryEditor",
 				"ProceduralMeshComponent"
 				// ... add other public dependencies that you statically link with here ...
 			}
