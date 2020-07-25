@@ -25,16 +25,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration", meta = (ClampMin = "0.1"))
 	float VoxelSize = 5;
 
-	// 1 - use default
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
-	float RainIntensity = 1.0;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
-	TArray<FOWBMapDistortion> MapDisplacements;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
-	TArray<FOWBRandHillSetup> RandomHills;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
 	int TerrainSeed = 0;
 
