@@ -75,9 +75,9 @@ void UOWB_EV_WorldVisializer::CreateVisualization() {
 						FIntVector ChunkMetrics = LayerChunk.MaxPoint - LayerChunk.MinPoint;
 
 						FVector MeshLocation = { VoxelSize, VoxelSize, VoxelSize };
-						MeshLocation.X *= LayerChunk.MinPoint.X - 1 + 0.5 * ChunkMetrics.X;
-						MeshLocation.Y *= LayerChunk.MinPoint.Y - 1 + 0.5 * ChunkMetrics.Y;
-						MeshLocation.Z *= LayerChunk.MinPoint.Z - 1 + 0.5 * ChunkMetrics.Z;
+						MeshLocation.X *= LayerChunk.MinPoint.X - 2 + 0.5 * ChunkMetrics.X;
+						MeshLocation.Y *= LayerChunk.MinPoint.Y - 2 + 0.5 * ChunkMetrics.Y;
+						MeshLocation.Z *= LayerChunk.MinPoint.Z - 2 + 0.5 * ChunkMetrics.Z;
 						MeshLocation += LandscapeShift;
 
 						NewChunk->SetActorRelativeLocation(MeshLocation, false, nullptr, {});

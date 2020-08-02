@@ -46,13 +46,13 @@ void UOWBDensityDataBuilder::DoGetFDensityPoint(const FIntVector& VoxelCoordinat
 		//		VoxelCoordinates.X, VoxelCoordinates.Y, VoxelCoordinates.Z,
 		//		ChunkSlot.X, ChunkSlot.Y, ChunkSlot.Z,X,Y,Z);
 
-		if (X <= 0 || Y <= 0 || X >= OWB->MapWidth - 1 || Y >= OWB->MapHeight - 1) {
+		if (X < 2 || Y < 2 || X >= OWB->MapWidth - 2 || Y >= OWB->MapHeight - 2) {
 			return;
 		}
 
-		X--;
-		Y--;
-		Z--;
+		X -= 2;
+		Y -= 2;
+		Z -= 2;
 #if !UE_BUILD_SHIPPING
 		if (X >= OWB->DebugTrapFrom.X && X <= OWB->DebugTrapTo.X && Y >= OWB->DebugTrapFrom.Y && Y <= OWB->DebugTrapTo.Y) {
 			UE_LOG(LogTemp, Log, TEXT("Debug trap %i:%i"), X, Y);
@@ -100,16 +100,16 @@ FDensityPoint UOWBDensityDataBuilder::BuildDensityPoint_Implementation(const FIn
 }
 
 
-FOWB_MarchingCubes::FOWB_MarchingCubes(FVoxelSettings MCSettings, UOWBDensityDataBuilder* DataBuilder) :
-	FMarchingCubes({}, nullptr, MCSettings, { 0,0,0 }), MyDDBuider(DataBuilder){}
+FOWB_MarchingCubes::FOWB_MarchingCubes(TSharedRef<FEasyVoxelsMCWorker, ESPMode::ThreadSafe> InWorker, FVoxelSettings MCSettings, UOWBDensityDataBuilder* DataBuilder) :
+	FMarchingCubes(InWorker, {}, nullptr, MCSettings, { 0,0,0 }), MyDDBuider(DataBuilder){}
 
 void FOWB_MarchingCubes::BuildDensityPoint(const FIntVector& VoxelCoordinates, FDensityPoint& DensityPoint) const
 {
 	MyDDBuider->DoGetFDensityPoint(VoxelCoordinates, DensityPoint);
 }
 
-FOWB_VoxelDataConverter::FOWB_VoxelDataConverter(const TArray<FVector>& InCoordinates, const TArray<int32>& InTriangles, const TMap<FIntVector, FDensityPoint>& InDensityData, const FVoxelSettings& InSettings, UOWBDensityDataBuilder* DataBuilder) :
-	FVoxelDataConverter(InCoordinates, InTriangles, InDensityData, nullptr, InSettings, {0,0,0}, true, false),
+FOWB_VoxelDataConverter::FOWB_VoxelDataConverter(TSharedRef<FEasyVoxelsMCWorker, ESPMode::ThreadSafe> InWorker, const TArray<FVector>& InCoordinates, const TArray<int32>& InTriangles, const TMap<FIntVector, FDensityPoint>& InDensityData, const FVoxelSettings& InSettings, UOWBDensityDataBuilder* DataBuilder) :
+	FVoxelDataConverter(InWorker,InCoordinates, InTriangles, InDensityData, nullptr, InSettings, {0,0,0}, true, false),
 	MyDDBuider(DataBuilder){}
 
 void FOWB_VoxelDataConverter::BuildDensityPoint(const FIntVector& VoxelCoordinates, FDensityPoint& DensityPoint) const

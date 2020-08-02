@@ -63,9 +63,9 @@ void AOWB_EV_Chunk::InitTerrainBuild()
 		return;
 	}
 
-	MCSettings.Units = MCSettings.Units + FIntVector(2, 2, 2);
+	MCSettings.Units = MCSettings.Units + FIntVector(4, 4, 4);
 	
-	WorkerCubes = MakeShareable(new FOWB_MarchingCubes(MCSettings, DensityBuilder));
+	WorkerCubes = MakeShareable(new FOWB_MarchingCubes(MCWorker, MCSettings, DensityBuilder));
 
 	TFunction<void()> BodyFunction = [this]
 	{
@@ -77,6 +77,7 @@ void AOWB_EV_Chunk::InitTerrainBuild()
 		AsyncTask(ENamedThreads::GameThread, [this]()
 			{
 				WorkerMesh = MakeShareable(new FOWB_VoxelDataConverter(
+					MCWorker,
 					WorkerCubes->Coordinates,
 					WorkerCubes->Triangles,
 					{},
@@ -99,13 +100,14 @@ void AOWB_EV_Chunk::InitTerrainBuild()
 							//WorkerMesh = nullptr;
 						});
 				};
-				//WorkerMesh->ConvertToMeshData();
-				//EndTerrainBuild(WorkerMesh->MeshData);
-				WorkerMesh->StartWork(BodyFunction2, OnCompleteFunction2, nullptr);
+				WorkerMesh->ConvertToMeshData();
+				EndTerrainBuild(WorkerMesh->MeshData);
+				//WorkerMesh->StartWork(BodyFunction2, OnCompleteFunction2, nullptr);
 			});
 	};
-
-	WorkerCubes->StartWork(BodyFunction, OnCompleteFunction, nullptr);
+	WorkerCubes->GenerateVoxelData();
+	OnCompleteFunction();
+	//WorkerCubes->StartWork(BodyFunction, OnCompleteFunction, nullptr);
 }
 
 
@@ -141,10 +143,10 @@ void AOWB_EV_Chunk::EndTerrainBuild(const FMeshData& AMeshData){
 			ParamsForThis.bDrawSlopeVector = false;
 		}
 		UCanvasRenderTarget2D* DebugTexture = OWB->CreateDebugTexture(
-			LayerChunk.MinPoint.X - 1,
-			LayerChunk.MinPoint.Y - 1,
-			LayerChunk.MaxPoint.X + 1,
-			LayerChunk.MaxPoint.Y + 1,
+			LayerChunk.MinPoint.X - 2,
+			LayerChunk.MinPoint.Y - 2,
+			LayerChunk.MaxPoint.X + 2,
+			LayerChunk.MaxPoint.Y + 2,
 			ParamsForThis
 		);
 

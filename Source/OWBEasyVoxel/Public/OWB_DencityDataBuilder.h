@@ -33,7 +33,7 @@ private:
 
 class OWBEASYVOXEL_API FOWB_MarchingCubes : public FMarchingCubes {
 public:
-	FOWB_MarchingCubes(FVoxelSettings MCSettings, UOWBDensityDataBuilder* DataBuilder);
+	FOWB_MarchingCubes(TSharedRef<FEasyVoxelsMCWorker, ESPMode::ThreadSafe> InWorker, FVoxelSettings MCSettings, UOWBDensityDataBuilder* DataBuilder);
 	virtual void BuildDensityPoint(const FIntVector& VoxelCoordinates, FDensityPoint& DensityPoint) const override;
 private:
 	UOWBDensityDataBuilder* MyDDBuider;
@@ -41,7 +41,7 @@ private:
 
 class OWBEASYVOXEL_API FOWB_VoxelDataConverter : public FVoxelDataConverter {
 public:
-	FOWB_VoxelDataConverter(const TArray<FVector>& InCoordinates, const TArray<int32>& InTriangles, const TMap<FIntVector, FDensityPoint>& InDensityData, const FVoxelSettings& InSettings, UOWBDensityDataBuilder* DataBuilder);
+	FOWB_VoxelDataConverter(TSharedRef<FEasyVoxelsMCWorker, ESPMode::ThreadSafe> InWorker, const TArray<FVector>& InCoordinates, const TArray<int32>& InTriangles, const TMap<FIntVector, FDensityPoint>& InDensityData, const FVoxelSettings& InSettings, UOWBDensityDataBuilder* DataBuilder);
 	virtual void BuildDensityPoint(const FIntVector& VoxelCoordinates, FDensityPoint& DensityPoint) const override;
 private:
 	UOWBDensityDataBuilder* MyDDBuider;

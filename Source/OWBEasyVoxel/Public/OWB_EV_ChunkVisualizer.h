@@ -76,6 +76,7 @@ private:
 
 	void EndTerrainBuild(const FMeshData& AMeshData);
 
+	TSharedRef<FEasyVoxelsMCWorker, ESPMode::ThreadSafe> MCWorker = MakeShareable(new FEasyVoxelsMCWorker());
 	TSharedPtr<FVoxelDataConverter, ESPMode::ThreadSafe> WorkerMesh = nullptr;
 	TSharedPtr<FMarchingCubes, ESPMode::ThreadSafe> WorkerCubes = nullptr;
 
