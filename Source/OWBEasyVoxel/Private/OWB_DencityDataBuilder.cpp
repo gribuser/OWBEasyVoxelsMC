@@ -1,3 +1,6 @@
+// Open World Bakery free additions
+// Copyright 2020 Dmitry Grivov, g@primitive.game, all rights reserved
+
 #include "OWB_DencityDataBuilder.h"
 //#include "MarchingCubes.h"
 //#include "MarchingCubesTables.h"

@@ -1,6 +1,5 @@
-// Open World Bakery
-// Copyright 2019 Dmitry Grivov, grib@gribuser.ru, all rights reserved.
-
+// Open World Bakery free additions
+// Copyright 2020 Dmitry Grivov, g@primitive.game, all rights reserved
 
 #pragma once
 
