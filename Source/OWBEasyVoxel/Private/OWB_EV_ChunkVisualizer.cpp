@@ -100,14 +100,14 @@ void AOWB_EV_Chunk::InitTerrainBuild()
 							//WorkerMesh = nullptr;
 						});
 				};
-				WorkerMesh->ConvertToMeshData();
-				EndTerrainBuild(WorkerMesh->MeshData);
-				//WorkerMesh->StartWork(BodyFunction2, OnCompleteFunction2, nullptr);
+				//WorkerMesh->ConvertToMeshData();
+				//EndTerrainBuild(WorkerMesh->MeshData);
+				MCWorker->StartWork(BodyFunction2, OnCompleteFunction2, nullptr);
 			});
 	};
-	WorkerCubes->GenerateVoxelData();
-	OnCompleteFunction();
-	//WorkerCubes->StartWork(BodyFunction, OnCompleteFunction, nullptr);
+	//WorkerCubes->GenerateVoxelData();
+	//OnCompleteFunction();
+	MCWorker->StartWork(BodyFunction, OnCompleteFunction, nullptr);
 }
 
 
