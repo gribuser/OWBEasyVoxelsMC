@@ -122,8 +122,8 @@ void AOWB_EV_Chunk::EndTerrainBuild(const FMeshData& AMeshData){
 	if (DebugMaterial != nullptr) {
 		ApplyedMaterial = DebugMaterial;
 
-		int BlockWidth = LayerChunk.MaxPoint.X - LayerChunk.MinPoint.X + 2;
-		int BLockHeight = LayerChunk.MaxPoint.Y - LayerChunk.MinPoint.Y + 2;
+		int BlockWidth = LayerChunk.MaxPoint.X - LayerChunk.MinPoint.X + 4;
+		int BLockHeight = LayerChunk.MaxPoint.Y - LayerChunk.MinPoint.Y + 4;
 
 		float TextureScaleX = 1.0f / BlockWidth / MCSettings.Resolution;
 		float TextureScaleY = 1.0f / BLockHeight / MCSettings.Resolution;
@@ -132,7 +132,7 @@ void AOWB_EV_Chunk::EndTerrainBuild(const FMeshData& AMeshData){
 
 		ApplyedMaterial->SetVectorParameterValue(
 			TEXT("MapShift"),
-			{ (float)(0.5 - 0.5 / BlockWidth), (float)(0.5 - 0.5 / BLockHeight), 1 });
+			{ (float)(0.5 - 1.5 / BlockWidth), (float)(0.5 - 1.5 / BLockHeight), 1 });
 //			{ (float)0.5, (float)0.5, 0 });
 		FDebugTextureParams ParamsForThis = WorldVisualizer->DebugTextureParams;
 		if (!FullScaleDebugTexture) {
