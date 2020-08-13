@@ -55,17 +55,17 @@ void UOWB_EV_WorldVisializer::TickComponent(float DeltaTime, ELevelTick TickType
 
 void UOWB_EV_WorldVisializer::CreateVisualization() {
 	if (!ensureMsgf(IsValid(OpenWorldBakery), TEXT("OpenWorldBakery object broken"))
-		|| !ensureMsgf(OpenWorldBakery->ChunksLayaut.XChunks > 0, TEXT("Chunks were not setup properly, call SetupChunks() first"))
-		|| !ensureMsgf(OpenWorldBakery->Chunks.Num() == OpenWorldBakery->ChunksLayaut.XChunks * OpenWorldBakery->ChunksLayaut.YChunks, TEXT("Chunks were not baked properly, call BakeHeightmap() first"))
+		|| !ensureMsgf(OpenWorldBakery->ChunksLayout.XChunks > 0, TEXT("Chunks were not setup properly, call SetupChunks() first"))
+		|| !ensureMsgf(OpenWorldBakery->Chunks.Num() == OpenWorldBakery->ChunksLayout.XChunks * OpenWorldBakery->ChunksLayout.YChunks, TEXT("Chunks were not baked properly, call BakeHeightmap() first"))
 		)
 		return;
 	if (ChunksVisualizers.Num() > 0) {
 		RemoveVisualization();
 	}
 	if (!OpenWorldBakery->bAbortAll) {
-		for (int x = 0; x < OpenWorldBakery->ChunksLayaut.XChunks; x++) {
-			for (int y = 0; y < OpenWorldBakery->ChunksLayaut.YChunks; y++) {
-				const FOWBMeshBlocks_set& CurChunksDescr = OpenWorldBakery->Chunks[y * OpenWorldBakery->ChunksLayaut.XChunks + x];
+		for (int x = 0; x < OpenWorldBakery->ChunksLayout.XChunks; x++) {
+			for (int y = 0; y < OpenWorldBakery->ChunksLayout.YChunks; y++) {
+				const FOWBMeshBlocks_set& CurChunksDescr = OpenWorldBakery->Chunks[y * OpenWorldBakery->ChunksLayout.XChunks + x];
 				for (EOWBMeshBlockTypes& Layer : LayersToDraw) {
 					if (CurChunksDescr.ChunkContents.Contains(Layer)) {
 						const FOWBMeshBlocks_set_contents& LayerChunk = CurChunksDescr.ChunkContents[Layer];
@@ -164,7 +164,7 @@ void UOWB_EV_WorldVisializer::RemoveVisualization() {
 
 const float SeaPlaneSize = 100;
 void UOWB_EV_WorldVisializer::PlaceOcean(int X, int Y, bool Water) {
-	float Scale = OpenWorldBakery->ChunksLayaut.ChunkWidth * VoxelSize / SeaPlaneSize;
+	float Scale = OpenWorldBakery->ChunksLayout.ChunkWidth * VoxelSize / SeaPlaneSize;
 	FActorSpawnParameters SpamParams;
 
 	FTransform MyTransform;
@@ -175,8 +175,8 @@ void UOWB_EV_WorldVisializer::PlaceOcean(int X, int Y, bool Water) {
 	if (ensureMsgf(ActorToSpawn != nullptr, TEXT("Ocean plane template not defined, see world generator props"))) {
 		AActor* APlaneActor = GetWorld()->SpawnActor<AActor>(ActorToSpawn, MyTransform);
 		APlaneActor->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
-		FVector BoxLocation(SeaPlaneSize / 2 * Scale + OpenWorldBakery->ChunksLayaut.ChunkWidth * VoxelSize * X,
-			SeaPlaneSize / 2 * Scale + OpenWorldBakery->ChunksLayaut.ChunkHeight * VoxelSize * Y,
+		FVector BoxLocation(SeaPlaneSize / 2 * Scale + OpenWorldBakery->ChunksLayout.ChunkWidth * VoxelSize * X,
+			SeaPlaneSize / 2 * Scale + OpenWorldBakery->ChunksLayout.ChunkHeight * VoxelSize * Y,
 			Water ? 0 : (float)(OpenWorldBakery->OceanDeep / OpenWorldBakery->CellWidth * VoxelSize));
 		BoxLocation += LandscapeShift;
 		APlaneActor->SetActorRelativeLocation(BoxLocation);

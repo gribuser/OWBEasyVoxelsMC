@@ -32,8 +32,8 @@ void AOWB_EV_Chunk::BeginPlay()
 void AOWB_EV_Chunk::BindToOpenWOrldBakery(UOpenWorldBakeryTextured* OpenWorldBakery, int ChunkX, int ChunkY) {
 	OWB = OpenWorldBakery;
 	if (ensureMsgf(OWB != nullptr, TEXT("Open world bakery not set, unsafe chunks setup - can not check - can not check validity")))
-		if (ensureMsgf(OWB->ChunksLayaut.XChunks > 0, TEXT("Open world bakery haven't executed CookChunks() yet, unsafe chunks setup - can not check validity")))
-			ensureMsgf(OWB->ChunksLayaut.XChunks >= ChunkX && OWB->ChunksLayaut.YChunks >= ChunkY, TEXT("You set wrong chunk %i:%i. Only %i:%i available"), ChunkX, ChunkY, OWB->ChunksLayaut.XChunks, OWB->ChunksLayaut.YChunks);
+		if (ensureMsgf(OWB->ChunksLayout.XChunks > 0, TEXT("Open world bakery haven't executed CookChunks() yet, unsafe chunks setup - can not check validity")))
+			ensureMsgf(OWB->ChunksLayout.XChunks >= ChunkX && OWB->ChunksLayout.YChunks >= ChunkY, TEXT("You set wrong chunk %i:%i. Only %i:%i available"), ChunkX, ChunkY, OWB->ChunksLayout.XChunks, OWB->ChunksLayout.YChunks);
 	if (ensureMsgf(ChunkX >= 0 && ChunkY >= 0, TEXT("Invalid chunks adress"))) {
 		ChunkX_ = ChunkX;
 		ChunkY_ = ChunkY;
