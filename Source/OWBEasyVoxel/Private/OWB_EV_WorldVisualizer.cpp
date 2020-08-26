@@ -6,14 +6,12 @@
 
 UOWB_EV_WorldVisializer::UOWB_EV_WorldVisializer() {
 	PrimaryComponentTick.bCanEverTick = true;
-	LayersToDraw.Add(EOWBMeshBlockTypes::Ground);
-	LayersToDraw.Add(EOWBMeshBlockTypes::FreshWater);
+	OpenWorldBakery = CreateDefaultSubobject<UOpenWorldBakeryTextured>(TEXT("OWB"), false);
 }
 
 void UOWB_EV_WorldVisializer::BeginPlay()
 {
 	Super::BeginPlay();
-	OpenWorldBakery = NewObject<UOpenWorldBakeryTextured>();
 	if (DebugTrapTo == FIntPoint(-1, -1))
 		DebugTrapTo = DebugTrapFrom;
 	OpenWorldBakery->DebugTrapFrom = DebugTrapFrom;

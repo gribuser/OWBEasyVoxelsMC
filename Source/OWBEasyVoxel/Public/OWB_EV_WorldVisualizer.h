@@ -31,7 +31,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
 	int TerrainSeed = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LandscapeGeneration")
 	UOpenWorldBakeryTextured* OpenWorldBakery;
 
 	UPROPERTY(EditDefaultsOnly, Category = "LandscapeGeneration")
@@ -92,8 +92,10 @@ private:
 	UPROPERTY()
 	TArray<AActor*> ChunksAdditionalActors;
 
-
-	TArray<EOWBMeshBlockTypes> LayersToDraw;
+	TArray<EOWBMeshBlockTypes> LayersToDraw = {
+		EOWBMeshBlockTypes::Ground,
+		EOWBMeshBlockTypes::FreshWater
+	};
 
 	void PlaceOcean(int X, int Y, bool Water);
 	void DrawChunkBox(const FOWBMeshBlocks_set_contents& LayerChunk);
