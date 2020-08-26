@@ -23,10 +23,10 @@ public:
 	//~UOWB_EV_WorldVisializer();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration", meta = (ClampMin = "16"))
-	int MapResolution = 128;
+	int MapResolution = 256;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration", meta = (ClampMin = "0.1"))
-	float VoxelSize = 5;
+	float VoxelSize = 50;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
 	int TerrainSeed = 0;
