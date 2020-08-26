@@ -92,6 +92,9 @@ void UOWBDensityDataBuilder::DoGetFDensityPoint(const FIntVector& VoxelCoordinat
 			DensityPoint.Color.B = Deep;
 			DensityPoint.Color.A = 1.0;
 		}
+		else if (Layer == EOWBMeshBlockTypes::Ground) {
+			DensityPoint.Color = OWB->TerrainVoxelColor(CookedGround);
+		}
 	}
 }
 
