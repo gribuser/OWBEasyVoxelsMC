@@ -123,7 +123,7 @@ bool UOWB_EV_WorldVisializer::DebugBitmapForThis(int x, int y) {
 }
 
 void UOWB_EV_WorldVisializer::DrawChunkBox(const FOWBMeshBlocks_set_contents& LayerChunk) {
-	if (ChunkVisualBP != nullptr) {
+	if (DebugChunkVisualBP != nullptr) {
 		for (const FOWBMeshChunk& Microchunk : LayerChunk.TypedBlocks) {
 			FIntVector ChunkMetrics = Microchunk.MaxPoint - Microchunk.MinPoint;
 
@@ -132,7 +132,7 @@ void UOWB_EV_WorldVisializer::DrawChunkBox(const FOWBMeshBlocks_set_contents& La
 
 			FTransform MyTransform;
 			MyTransform.SetScale3D(ScaleVect);
-			AActor* NewChunkBox = GetWorld()->SpawnActor<AActor>(ChunkVisualBP, MyTransform);
+			AActor* NewChunkBox = GetWorld()->SpawnActor<AActor>(DebugChunkVisualBP, MyTransform);
 			NewChunkBox->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
 
 			FVector MeshLocation = { VoxelSize, VoxelSize, VoxelSize };

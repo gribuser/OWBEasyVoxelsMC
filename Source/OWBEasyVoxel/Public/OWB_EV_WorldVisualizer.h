@@ -22,72 +22,71 @@ public:
 	UOWB_EV_WorldVisializer();
 	//~UOWB_EV_WorldVisializer();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration", meta = (ClampMin = "16"))
-	int MapResolution = 256;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration", meta = (ClampMin = "0.1"))
+	/// Physical size of the voxel in the world, generally should be somewhere in 50-150 range
+	/// for the walkable terrain
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bakery Landscape", meta = (ClampMin = "0.1"))
 	float VoxelSize = 50;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
-	int TerrainSeed = 0;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "LandscapeGeneration")
+	/// You can set things up here, you can interact with it.
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Bakery Landscape")
 	UOpenWorldBakeryTextured* OpenWorldBakery;
 
-	UPROPERTY(EditDefaultsOnly, Category = "LandscapeGeneration")
+	/// Not used internally, just a handy variable to store res
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Helper variables", meta = (ClampMin = "16"))
+	int MapResolution = 256;
+	
+	/// Not used internally, just a handy variable to store seed
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Helper variables")
+	int TerrainSeed = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bakery Landscape")
+	TMap<EOWBMeshBlockTypes, UMaterialInterface*> TypedMaterials;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite , Category = "Bakery Landscape")
 	TSubclassOf<AActor> OceanPlaneBP;
 
-	UPROPERTY(EditDefaultsOnly, Category = "LandscapeGeneration")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bakery Landscape")
 	TSubclassOf<AActor> OceandeepPlaneBP;
 
-	UPROPERTY(EditDefaultsOnly, Category = "LandscapeGeneration")
-	TSubclassOf<AActor> ChunkVisualBP;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, Category = "Bakery Landscape")
+	TSubclassOf<AActor> DebugChunkVisualBP;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bakery Landscape")
 	FVector LandscapeShift;
 
-	FCriticalSection MeshGeneratorLock;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, Category = "LandscapeGeneration")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, Category = "Bakery Landscape")
 	FDebugTextureParams DebugTextureParams;
 
-
+	FCriticalSection MeshGeneratorLock;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	FCriticalSection MeshGenLock;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "LandscapeGeneration")
-	float ChunkSize = 5;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, Category = "LandscapeGeneration")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, Category = "Bakery Landscape")
 	TArray<FIntPoint> DebugVoxels = { {-1,-1} };
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, Category = "Bakery Landscape")
 	UMaterialInterface* DebugMaterialTemplate;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
-	TMap<EOWBMeshBlockTypes, UMaterialInterface*> TypedMaterials;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, Category = "Bakery Landscape")
 	FIntPoint DebugTrapFrom = { -1,-1 };
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OpenWorldBakery")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, AdvancedDisplay, Category = "Bakery Landscape")
 	FIntPoint DebugTrapTo = { -1,-1 };
 
-	UFUNCTION(BlueprintCallable, Category = "LandscapeGeneration")
+	UFUNCTION(BlueprintCallable, Category = "Bakery Landscape")
 	void RemoveVisualization();
 
-	UFUNCTION(BlueprintCallable, Category = "LandscapeGeneration")
+	UFUNCTION(BlueprintCallable, Category = "Bakery Landscape")
 	void CreateVisualization();
 
 private:
 //	FVoxelSettings Voxel;
 	UPROPERTY()
 	TArray<AOWB_EV_Chunk*> ChunksVisualizers;
+
 
 	UPROPERTY()
 	TArray<AActor*> ChunksAdditionalActors;
