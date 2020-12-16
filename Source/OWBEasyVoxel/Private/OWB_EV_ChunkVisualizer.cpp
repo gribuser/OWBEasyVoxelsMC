@@ -66,47 +66,32 @@ void AOWB_EV_Chunk::InitTerrainBuild()
 	
 	WorkerCubes = MakeShareable(new FOWB_MarchingCubes(MCWorker, MCSettings, DensityBuilder));
 
-	TFunction<void()> BodyFunction = [this]
-	{
-		WorkerCubes->GenerateVoxelData();
-	};
 
 	TFunction<void()> OnCompleteFunction = [this]
 	{
 		AsyncTask(ENamedThreads::GameThread, [this]()
 			{
 				WorkerMesh = MakeShareable(new FOWB_VoxelDataConverter(
+					MCSettings,
 					MCWorker,
-					WorkerCubes->Coordinates,
-					WorkerCubes->Triangles,
-					{},
-					MCSettings, //const bool UseGradientNormals, const bool UseFlatShading
 					DensityBuilder
 				));
-				//WorkerCubes.Reset();
-				//WorkerCubes = nullptr;
-				TFunction<void()> BodyFunction2 = [this]
-				{
-					WorkerMesh->ConvertToMeshData();
-				};
 
 				TFunction<void()> OnCompleteFunction2 = [this]
 				{
 					AsyncTask(ENamedThreads::GameThread, [this]()
 						{
-							EndTerrainBuild(WorkerMesh->MeshData);
+							EndTerrainBuild(*WorkerMesh->MeshData);
 							//WorkerMesh.Reset();
 							//WorkerMesh = nullptr;
 						});
 				};
-				//WorkerMesh->ConvertToMeshData();
-				//EndTerrainBuild(WorkerMesh->MeshData);
-				MCWorker->StartWork(BodyFunction2, OnCompleteFunction2, nullptr);
+				FVoxelDataSimplifierSettings SimplifierSettings;
+				WorkerMesh->Convert(DensityBuilder, *WorkerCubes->VoxelData, SimplifierSettings, OnCompleteFunction2);
 			});
 	};
-	//WorkerCubes->GenerateVoxelData();
-	//OnCompleteFunction();
-	MCWorker->StartWork(BodyFunction, OnCompleteFunction, nullptr);
+
+	WorkerCubes->Generate(DensityBuilder, OnCompleteFunction);
 }
 
 

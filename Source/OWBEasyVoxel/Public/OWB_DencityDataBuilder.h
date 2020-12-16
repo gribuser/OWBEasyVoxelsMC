@@ -23,8 +23,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "OpenWorldBakery")
 	void SetLayer(EOWBMeshBlockTypes MapLayer);
 
-	virtual FDensityPoint BuildDensityPoint_Implementation(const FIntVector& VoxelCoordinates, const FIntVector& ChunkSlot, const FVoxelSettings& Settings) override;
-	void DoGetFDensityPoint(const FIntVector& VoxelCoordinates, FDensityPoint& DensityPoint);
+	virtual void BuildDensityPoint_Implementation(const FIntVector& VoxelCoordinates, const FIntVector& ChunkSlot, const FVoxelSettings& Settings, FDensityPoint& DensityPoint) override;
+	FDensityPoint* DoGetFDensityPoint(const FIntVector& VoxelCoordinates);
 private:
 	UPROPERTY()
 	UOpenWorldBakery* OWB = nullptr;
@@ -37,15 +37,15 @@ private:
 class OWBEASYVOXEL_API FOWB_MarchingCubes : public FMarchingCubes {
 public:
 	FOWB_MarchingCubes(TSharedRef<FEasyVoxelsMCWorker, ESPMode::ThreadSafe> InWorker, FVoxelSettings MCSettings, UOWBDensityDataBuilder* DataBuilder);
-	virtual void BuildDensityPoint(const FIntVector& VoxelCoordinates, FDensityPoint& DensityPoint) const override;
+	virtual FDensityPoint* GetDensityPoint(const FIntVector& VoxelCoordinates) override;
 private:
 	UOWBDensityDataBuilder* MyDDBuider;
 };
 
 class OWBEASYVOXEL_API FOWB_VoxelDataConverter : public FVoxelDataConverter {
 public:
-	FOWB_VoxelDataConverter(TSharedRef<FEasyVoxelsMCWorker, ESPMode::ThreadSafe> InWorker, const TArray<FVector>& InCoordinates, const TArray<int32>& InTriangles, const TMap<FIntVector, FDensityPoint>& InDensityData, const FVoxelSettings& InSettings, UOWBDensityDataBuilder* DataBuilder);
-	virtual void BuildDensityPoint(const FIntVector& VoxelCoordinates, FDensityPoint& DensityPoint) const override;
+	FOWB_VoxelDataConverter(const FVoxelSettings& InSettings, TSharedRef<FEasyVoxelsMCWorker, ESPMode::ThreadSafe> InWorker, UOWBDensityDataBuilder* DataBuilder);
+	virtual FDensityPoint* GetDensityPoint(const FIntVector& VoxelCoordinates) override; 
 private:
 	UOWBDensityDataBuilder* MyDDBuider;
 };

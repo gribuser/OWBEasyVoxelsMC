@@ -23,9 +23,9 @@ void UOWBDensityDataBuilder::SetLayer(EOWBMeshBlockTypes MapLayer) {
 	Layer = MapLayer;
 }
 
-void UOWBDensityDataBuilder::DoGetFDensityPoint(const FIntVector& VoxelCoordinates, FDensityPoint& DensityPoint)
+FDensityPoint* UOWBDensityDataBuilder::DoGetFDensityPoint(const FIntVector& VoxelCoordinates)
 {
-	DensityPoint = FDensityPoint(0, FLinearColor(0, 0, 0, 0));
+	FDensityPoint* DensityPoint = new FDensityPoint(0, FLinearColor(0, 0, 0, 0));
 	if (ensureMsgf(OWB != nullptr, TEXT("Open world bakery not set, call BindToOpenWOrldBakery first"))
 		&& ensureMsgf(OWB->MapWidth > 0, TEXT("Open world bakery has no world cooked (have you called CalcHillsLayaut() already?)"))) {
 		int Z = VoxelCoordinates.Z;
@@ -40,7 +40,7 @@ void UOWBDensityDataBuilder::DoGetFDensityPoint(const FIntVector& VoxelCoordinat
 				Z += ChunkDescrs.ChunkContents[Layer].MinPoint.Z;
 			}
 			else {
-				return;
+				return DensityPoint;
 			}
 		}
 
@@ -50,7 +50,7 @@ void UOWBDensityDataBuilder::DoGetFDensityPoint(const FIntVector& VoxelCoordinat
 		//		ChunkSlot.X, ChunkSlot.Y, ChunkSlot.Z,X,Y,Z);
 
 		if (X < 2 || Y < 2 || X >= OWB->MapWidth - 2 || Y >= OWB->MapHeight - 2) {
-			return;
+			return DensityPoint;
 		}
 
 		X -= 2;
@@ -73,7 +73,7 @@ void UOWBDensityDataBuilder::DoGetFDensityPoint(const FIntVector& VoxelCoordinat
 		}
 #endif
 		//		float BtmLVL = OWB->CellWidth * Z;
-		DensityPoint.Value = ThisCellHeight - Z;
+		DensityPoint->Value = ThisCellHeight - Z;
 
 		if (Layer == EOWBMeshBlockTypes::FreshWater) {
 			// Water needs some extra info
@@ -87,38 +87,39 @@ void UOWBDensityDataBuilder::DoGetFDensityPoint(const FIntVector& VoxelCoordinat
 			NormalAsColor.Y *= -1;
 			NormalAsColor = (NormalAsColor + FVector2D(1.0, 1.0)) / 2;
 
-			DensityPoint.Color.R = NormalAsColor.X;
-			DensityPoint.Color.G = NormalAsColor.Y;
-			DensityPoint.Color.B = Deep;
-			DensityPoint.Color.A = 1.0;
+			DensityPoint->Color.R = NormalAsColor.X;
+			DensityPoint->Color.G = NormalAsColor.Y;
+			DensityPoint->Color.B = Deep;
+			DensityPoint->Color.A = 1.0;
 		}
 		else if (Layer == EOWBMeshBlockTypes::Ground) {
-			DensityPoint.Color = OWB->TerrainVoxelColor(CookedGround);
+			DensityPoint->Color = OWB->TerrainVoxelColor(CookedGround);
 		}
 	}
+	return DensityPoint;
 }
 
-FDensityPoint UOWBDensityDataBuilder::BuildDensityPoint_Implementation(const FIntVector& VoxelCoordinates, const FIntVector& ChunkSlot, const FVoxelSettings& Settings)
+void UOWBDensityDataBuilder::BuildDensityPoint_Implementation(const FIntVector& VoxelCoordinates, const FIntVector& ChunkSlot, const FVoxelSettings& Settings, FDensityPoint& DensityPoint)
 {
-	FDensityPoint ThisPointData;
-	DoGetFDensityPoint(VoxelCoordinates, ThisPointData);
-	return ThisPointData;
+	FDensityPoint* Tmp = DoGetFDensityPoint(VoxelCoordinates);
+	DensityPoint = *Tmp;
+	delete Tmp;
 }
 
 
 FOWB_MarchingCubes::FOWB_MarchingCubes(TSharedRef<FEasyVoxelsMCWorker, ESPMode::ThreadSafe> InWorker, FVoxelSettings MCSettings, UOWBDensityDataBuilder* DataBuilder) :
-	FMarchingCubes(InWorker, {}, nullptr, MCSettings, { 0,0,0 }), MyDDBuider(DataBuilder){}
+	FMarchingCubes(MCSettings, { 0,0,0 }, InWorker), MyDDBuider(DataBuilder){}
 
-void FOWB_MarchingCubes::BuildDensityPoint(const FIntVector& VoxelCoordinates, FDensityPoint& DensityPoint) const
+FDensityPoint* FOWB_MarchingCubes::GetDensityPoint(const FIntVector& VoxelCoordinates)
 {
-	MyDDBuider->DoGetFDensityPoint(VoxelCoordinates, DensityPoint);
+	return MyDDBuider->DoGetFDensityPoint(VoxelCoordinates);
 }
 
-FOWB_VoxelDataConverter::FOWB_VoxelDataConverter(TSharedRef<FEasyVoxelsMCWorker, ESPMode::ThreadSafe> InWorker, const TArray<FVector>& InCoordinates, const TArray<int32>& InTriangles, const TMap<FIntVector, FDensityPoint>& InDensityData, const FVoxelSettings& InSettings, UOWBDensityDataBuilder* DataBuilder) :
-	FVoxelDataConverter(InWorker,InCoordinates, InTriangles, InDensityData, nullptr, InSettings, {0,0,0}, true, false),
+FOWB_VoxelDataConverter::FOWB_VoxelDataConverter(const FVoxelSettings& InSettings, TSharedRef<FEasyVoxelsMCWorker, ESPMode::ThreadSafe> InWorker, UOWBDensityDataBuilder* DataBuilder) :
+	FVoxelDataConverter(InSettings, {0,0,0}, InWorker),
 	MyDDBuider(DataBuilder){}
 
-void FOWB_VoxelDataConverter::BuildDensityPoint(const FIntVector& VoxelCoordinates, FDensityPoint& DensityPoint) const
+FDensityPoint* FOWB_VoxelDataConverter::GetDensityPoint(const FIntVector& VoxelCoordinates)
 {
-	MyDDBuider->DoGetFDensityPoint(VoxelCoordinates, DensityPoint);
+	return MyDDBuider->DoGetFDensityPoint(VoxelCoordinates);
 }
